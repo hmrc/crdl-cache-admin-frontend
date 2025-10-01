@@ -11,3 +11,5 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+
+GET        /internal-auth-frontend/sign-in uk.gov.hmrc.crdlcacheadminfrontend.auth.testOnly.TestOnlyAuthController.localRedirect() 
