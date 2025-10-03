@@ -1,7 +1,9 @@
 service.name = Central Ref Data Library Admin
 service.text = Welcome to the Central Data Reference Library - Admin service
 
-page.title = {0} - CRDL Admin
+page.title = {0} - CRDL Cache Admin
+
+links.details = Details
 
 ########## Service Navigation
 serviceNavigation.codeLists = Code Lists
@@ -21,10 +23,15 @@ serviceNavigation.epc = EPC Codes
 ########## Homepage
 homepage.pageTitle = Homepage
 
+########## Errors
+error.notfound = If you typed the web address, please check it is correct.
+error.codelist.snapshot.notfound.heading = Unable to load Code List {0}
+error.codelist.snapshot.notfound.text = No matching snapshot was found for the code list {0}. Unable to load code list data.
+
 ########## CodeLists
 codeLists.viewLists.pageTitle = Code Lists
 codeLists.viewLists.table.headings.code = List Code
-codeLists.viewLists.table.headings.snapshot = Snapshot Version
+codeLists.viewLists.table.headings.snapshot = Version
 codeLists.viewLists.table.headings.updated = Last Updated
 
 codeLists.listDetail.pageTitle = Code List Details: {0}

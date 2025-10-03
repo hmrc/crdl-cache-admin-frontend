@@ -16,7 +16,7 @@
 
 @import uk.gov.hmrc.crdlcacheadminfrontend.views.html.Layout
 @import uk.gov.hmrc.crdlcacheadminfrontend.views.html.components._
-@import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.CustomsOffice
+@import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.viewModels.CustomsOfficeViewModel
 @import uk.gov.hmrc.crdlcacheadminfrontend.utils.ViewUtils.*
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
@@ -27,15 +27,15 @@
     govukSummaryList: GovukSummaryList
 )
 
-@(customsOffice: CustomsOffice)(implicit request: RequestHeader, messages: Messages)
+@(customsOffice: CustomsOfficeViewModel)(implicit request: RequestHeader, messages: Messages)
 
-@layout(pageTitle = Some(pageTitle(messages("customsOffices.officeDetails.pageTitle", customsOffice.customsOfficeLsd.customsOfficeUsualName)))) {   
-    @heading(messages("customsOffices.officeDetails.pageTitle", customsOffice.customsOfficeLsd.customsOfficeUsualName))
+@layout(pageTitle = Some(pageTitle(messages("customsOffices.officeDetails.pageTitle", customsOffice.officeUsualName)))) {   
+    @heading(messages("customsOffices.officeDetails.pageTitle", customsOffice.officeUsualName))
 
     @govukSummaryList(SummaryList(
         rows = Seq(
             SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.ref"))), value = Value(Text(customsOffice.referenceNumber))),
-            SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.name"))), value = Value(Text(customsOffice.customsOfficeLsd.customsOfficeUsualName))),
+            SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.name"))), value = Value(Text(customsOffice.officeUsualName))),
             SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.activeFrom"))), value = Value(Text(valueOrDefault(formatDateWithTime(customsOffice.activeFrom))))),
             SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.activeTo"))), value = Value(Text(valueOrDefault(formatDateWithTime(customsOffice.activeTo)))))
         )
@@ -49,10 +49,10 @@
                     ))
                 )),
                 rows = Seq(
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.city"))), value = Value(Text(customsOffice.customsOfficeLsd.city))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.country"))), value = Value(Text(customsOffice.countryCode))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.region"))), value = Value(Text(optionOrDefault(customsOffice.regionCode)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.language"))), value = Value(Text(customsOffice.customsOfficeLsd.languageCode)))
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.city"))), value = Value(Text(customsOffice.location.city))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.country"))), value = Value(Text(customsOffice.location.country))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.region"))), value = Value(Text(optionOrDefault(customsOffice.location.region)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.language"))), value = Value(Text(customsOffice.location.language)))
                 )
             ))
         </li>
@@ -67,16 +67,15 @@
                 rows = Seq(
                     SummaryListRow(
                         key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.address"))),
-                        value = Value(HtmlContent(formatOfficeAddress(
-                            customsOffice.customsOfficeLsd.streetAndNumber,
-                            customsOffice.customsOfficeLsd.city,
-                            customsOffice.postalCode
-                        )))
+                        value = Value(HtmlContent(valueOrDefault(s"""
+                            <div>${customsOffice.contact.streetAndNumber}</div>
+                            <div>${customsOffice.location.city} ${customsOffice.contact.postalCode}</div>                            
+                        """)))
                     ),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.telephone"))), value = Value(Text(optionOrDefault(customsOffice.phoneNumber)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.fax"))), value = Value(Text(optionOrDefault(customsOffice.faxNumber)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.telex"))), value = Value(Text(optionOrDefault(customsOffice.telexNumber)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.email"))), value = Value(Text(optionOrDefault(customsOffice.emailAddress))))
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.telephone"))), value = Value(Text(optionOrDefault(customsOffice.contact.phoneNumber)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.fax"))), value = Value(Text(optionOrDefault(customsOffice.contact.faxNumber)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.telex"))), value = Value(Text(optionOrDefault(customsOffice.contact.telexNumber)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.email"))), value = Value(Text(optionOrDefault(customsOffice.contact.emailAddress))))
                 )
             ))
         </li>
@@ -89,9 +88,9 @@
                     ))
                 )),
                 rows = Seq(
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.trader.keys.dedicated"))), value = Value(Text(displayBool(customsOffice.traderDedicated)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.trader.keys.name"))), value = Value(Text(optionOrDefault(customsOffice.dedicatedTraderName)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.trader.keys.language"))), value = Value(Text(optionOrDefault(customsOffice.dedicatedTraderLanguageCode))))
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.trader.keys.dedicated"))), value = Value(Text(displayBool(customsOffice.trader.traderDedicated)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.trader.keys.name"))), value = Value(Text(optionOrDefault(customsOffice.trader.dedicatedTraderName)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.trader.keys.language"))), value = Value(Text(optionOrDefault(customsOffice.trader.dedicatedTraderLanguageCode))))
                 )
             ))
         </li>
@@ -104,10 +103,10 @@
                     ))
                 )),
                 rows = Seq(
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.nctsDate"))), value = Value(Text(optionOrDefault(customsOffice.nctsEntryDate)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.unLocode"))), value = Value(Text(optionOrDefault(customsOffice.unLocodeId)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.geo"))), value = Value(Text(optionOrDefault(customsOffice.geoInfoCode)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.notes"))), value = Value(Text(valueOrDefault(customsOffice.customsOfficeSpecificNotesCodes.mkString(", ")))))
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.nctsDate"))), value = Value(Text(optionOrDefault(customsOffice.specificInfo.nctsEntryDate)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.unLocode"))), value = Value(Text(optionOrDefault(customsOffice.specificInfo.unLocodeId)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.geo"))), value = Value(Text(optionOrDefault(customsOffice.specificInfo.geoInfoCode)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.notes"))), value = Value(Text(valueOrDefault(customsOffice.specificInfo.notes))))
                 )
             ))
         </li>
@@ -120,12 +119,12 @@
                     ))
                 )),
                 rows = Seq(
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.higher"))), value = Value(Text(optionOrDefault(customsOffice.referenceNumberHigherAuthority)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.main"))), value = Value(Text(optionOrDefault(customsOffice.referenceNumberMainOffice)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.enquiry"))), value = Value(Text(optionOrDefault(customsOffice.referenceNumberCompetentAuthorityOfEnquiry)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.recovery"))), value = Value(Text(optionOrDefault(customsOffice.referenceNumberCompetentAuthorityOfRecovery)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.nearest"))), value = Value(Text(optionOrDefault(customsOffice.nearestOffice)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.takeover"))), value = Value(Text(optionOrDefault(customsOffice.referenceNumberTakeover))))
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.higher"))), value = Value(Text(optionOrDefault(customsOffice.references.numberHigherAuthority)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.main"))), value = Value(Text(optionOrDefault(customsOffice.references.numberMainOffice)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.enquiry"))), value = Value(Text(optionOrDefault(customsOffice.references.numberCompetentAuthorityOfEnquiry)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.recovery"))), value = Value(Text(optionOrDefault(customsOffice.references.numberCompetentAuthorityOfRecovery)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.nearest"))), value = Value(Text(optionOrDefault(customsOffice.references.nearestOffice)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.takeover"))), value = Value(Text(optionOrDefault(customsOffice.references.numberTakeover))))
                 )
             ))
         </li>
@@ -138,10 +137,10 @@
                     ))
                 )),
                 rows = Seq(
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.prefixSuffixFlag"))), value = Value(Text(displayBool(customsOffice.customsOfficeLsd.prefixSuffixFlag)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.prefixSuffixLevel"))), value = Value(Text(optionOrDefault(customsOffice.customsOfficeLsd.prefixSuffixLevel)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.prefixSuffixName"))), value = Value(Text(optionOrDefault(customsOffice.customsOfficeLsd.prefixSuffixName)))),
-                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.spaceToAdd"))), value = Value(Text(displayBool(displayBool(customsOffice.customsOfficeLsd.spaceToAdd)))))
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.prefixSuffixFlag"))), value = Value(Text(displayBool(customsOffice.details.prefixSuffixFlag)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.prefixSuffixLevel"))), value = Value(Text(optionOrDefault(customsOffice.details.prefixSuffixLevel)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.prefixSuffixName"))), value = Value(Text(optionOrDefault(customsOffice.details.prefixSuffixName)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.spaceToAdd"))), value = Value(Text(displayBool(customsOffice.details.spaceToAdd))))
                 )
             ))
         </li>
@@ -149,7 +148,7 @@
 
     @heading(messages("customsOffices.officeDetails.timetables.heading"), Some(2), Some("m"))
 
-        @for(timetable <- customsOffice.customsOfficeTimetable) {
+        @for(timetable <- customsOffice.timetables) {
             @heading(s"${timetable.seasonCode} - ${optionOrDefault(timetable.seasonName, messages("customsOffices.officeDetails.timetables.heading.default"))}", Some(3), Some("s"))
             @govukSummaryList(SummaryList(
                 rows = Seq(
@@ -158,7 +157,7 @@
                 )
             ))
             <ul class="govuk-list">
-                @for(timetableLine <- timetable.customsOfficeTimetableLine) {
+                @for(timetableLine <- timetable.timetableLines) {
                     <li>
                         @govukSummaryList(SummaryList(
                             card = Some(Card(

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.crdlcacheadminfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
+import play.api.i18n.I18nSupport
 import play.api.mvc.MessagesControllerComponents
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.crdlcacheadminfrontend.auth.AuthActions
@@ -31,15 +32,12 @@ class IndexController @Inject()(
   authActions: AuthActions,
   mcc: MessagesControllerComponents,
   indexPage: Index
-) extends FrontendController(mcc){
-    given FrontendAuthComponents = auth
-
-    def onPageLoad() = Action.async { implicit request => 
-      authActions.handle(
-              routes.IndexController.onPageLoad(),
-              r => {
-                  successful(Ok(indexPage()))
-              }
-          )
-    }
+) extends FrontendController(mcc) with I18nSupport {
+    def onPageLoad() = 
+      auth.authorizedAction(
+          continueUrl = routes.IndexController.onPageLoad(),
+          predicate = authActions.permission
+      ).async { implicit request =>
+          successful(Ok(indexPage()))
+      }
 }

@@ -25,7 +25,7 @@ import scala.concurrent.Future
 import play.api.mvc.{Call, Result}
 
 class AuthActions {
-    private val permission = Predicate.Permission(
+    val permission = Predicate.Permission(
         Resource(
           ResourceType("crdl-cache"),
           ResourceLocation("*")

@@ -26,14 +26,11 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 class AuthController @Inject()(auth: FrontendAuthComponents, authActions: AuthActions, mcc: MessagesControllerComponents)
   extends FrontendController(mcc) {
-    given FrontendAuthComponents = auth
-
-    def signIn() = Action.async { implicit request =>
-        authActions.handle(
-            authRoutes.AuthController.signIn(),
-            r => {
-                successful(Redirect(routes.IndexController.onPageLoad()))
-            }
-        )
+    def signIn() =
+        auth.authorizedAction(
+            continueUrl = authRoutes.AuthController.signIn(),
+            predicate = authActions.permission
+        ).async { implicit request =>
+            successful(Redirect(routes.IndexController.onPageLoad()))
+        }
     }
-}

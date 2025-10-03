@@ -23,7 +23,8 @@
 @this(
     layout: Layout,
     govukTable: GovukTable,
-    heading: Heading
+    heading: Heading,
+    link: Link
 )
 
 @(snapshots: List[CodeListSnapshot])(implicit request: RequestHeader, messages: Messages)
@@ -41,16 +42,10 @@
             TableRow(content = Text(s.codeListCode)),
             TableRow(content = Text(s.snapshotVersion.toString())),
             TableRow(content = Text(formatDateWithTime(s.lastUpdated))),
-            TableRow(content = codeListDetailsLink(s.codeListCode))
+            TableRow(content = HtmlContent(link(s"details-${s.codeListCode}", messages("links.details"), listDetailUrl(s.codeListCode), Some(s"for code list ${s.codeListCode}"))))
         ))
     ))
 }
-
-@{
-    //$COVERAGE-OFF$
-}
-
-
 
 @{
     //$COVERAGE-OFF$

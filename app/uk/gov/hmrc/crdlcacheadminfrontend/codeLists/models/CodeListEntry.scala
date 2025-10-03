@@ -21,7 +21,7 @@ import play.api.libs.json.*
 case class CodeListEntry(
   key: String,
   value: String,
-  properties: Map[String, String]
+  properties: JsObject
 )
 
 object CodeListEntry {

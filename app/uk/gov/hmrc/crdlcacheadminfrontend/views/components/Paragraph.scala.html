@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.crdlcacheadminfrontend
+@this()
 
-import play.api.{Configuration, Environment}
-import play.api.inject.{Binding, Module => AppModule}
+@(message: String, classes: Option[String] = None)
 
-import java.time.Clock
-
-class Module extends AppModule:
-
-  override def bindings(
-    environment  : Environment,
-    configuration: Configuration
-  ): Seq[Binding[_]] =
-    bind[Clock].toInstance(Clock.systemDefaultZone) :: // inject if current time needs to be controlled in unit tests
-    Nil
+<p @classes.fold{class="govuk-body"}{classes => class="govuk-body @classes"}>@message</p>

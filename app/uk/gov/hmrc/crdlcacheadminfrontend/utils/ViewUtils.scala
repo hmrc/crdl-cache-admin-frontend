@@ -20,7 +20,6 @@ import java.time.format.DateTimeFormatter
 import java.time.Instant
 import play.api.i18n.Messages
 import java.time.ZoneId
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -28,7 +27,7 @@ object ViewUtils {
     def pageTitle(title: String)(implicit messages: Messages) =
         messages("page.title", title)
 
-    val baseUrl = "crdl-cache"
+    val baseUrl = "crdl-cache-admin-frontend"
 
     def withBaseUrl(url: String): String = s"/$baseUrl/$url"
 
@@ -38,48 +37,12 @@ object ViewUtils {
     val officesUrl = withBaseUrl("offices")
     def officeDetailUrl(referenceNumber: String) = withBaseUrl(s"offices/$referenceNumber")
 
-    val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd H:mm:ss").withZone(ZoneId.of("UTC"))
-    def formatDateWithTime(instant: Option[Instant]): String = instant.fold("")(i => dateTimeFormatter.format(i))
-    val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    def formatLocalDate(date: LocalDate): String = dateFormatter.format(date)
-    val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("H:mm")
-    def formatLocalTime(time: LocalTime): String = timeFormatter.format(time)
+    def formatDateWithTime(instant: Option[Instant]): String = instant.fold("")(i => DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")).format(i))
+    def formatLocalDate(date: LocalDate): String = DateTimeFormatter.ISO_DATE.format(date)
+    def formatLocalTime(time: LocalTime): String = DateTimeFormatter.ISO_TIME.format(time)
     def formatLocalTime(time: Option[LocalTime]): String = time.fold("")(t => formatLocalTime(t))
 
-
-    def codeListDetailsLink(code: String): HtmlContent = HtmlContent(
-        s"""
-            <a href="${{listDetailUrl(code)}}">
-                Details
-                <span class="govuk-visually-hidden">for code list $code</span>
-            </a>
-        """
-    )
-
-    def customOfficeDetailsLink(referenceNumber: String): HtmlContent = HtmlContent(
-        s"""
-            <a href="${{officeDetailUrl(referenceNumber)}}">
-                Details
-                <span class="govuk-visually-hidden">for customs office $referenceNumber</span>
-            </a>
-        """
-    )
-
-    def formatCodeListProperties(properties: Map[String, String]) = {
-        s"""
-            ${properties.map { case (k, v) => s"<p class='govuk-!-margin-0'>$k => $v</p>"}.mkString("")}
-        """
-    }
-
-    def formatOfficeAddress(address: String, city: String, postcode: String) = {
-        s"""
-            <div>$address</div>
-            <div>$city $postcode</div>
-        """
-    }
-
     val defaultVal = "-"
-
     def valueOrDefault(value: String, default: String = defaultVal): String = if (value.trim.isEmpty()) default else value
     def optionOrDefault[A](value: Option[A], default: String = defaultVal): String = value.fold(default)(_.toString())
     def displayBool(value: Boolean): String = if (value) "True" else "False"

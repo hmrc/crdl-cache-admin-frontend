@@ -17,17 +17,16 @@
 package uk.gov.hmrc.crdlcacheadminfrontend.codeLists.controllers
 
 import javax.inject.{Inject, Singleton}
+import play.api.i18n.I18nSupport
 import play.api.mvc.MessagesControllerComponents
-import scala.concurrent.Future.successful
 import uk.gov.hmrc.crdlcacheadminfrontend.auth.AuthActions
 import uk.gov.hmrc.crdlcacheadminfrontend.connectors.CRDLConnector
+import uk.gov.hmrc.crdlcacheadminfrontend.views.html.NotFound
 import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.views.html.{Lists, ListDetail}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.ExecutionContext
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
+import play.api.i18n.Messages
 
 @Singleton
 class CodeListsController @Inject(
@@ -35,31 +34,41 @@ class CodeListsController @Inject(
     authActions: AuthActions,
     crdlConnector: CRDLConnector,
     mcc: MessagesControllerComponents,
+    notFoundPage: NotFound,
     listsPage: Lists,
     listDetailsPage: ListDetail
-)(using ExecutionContext) extends FrontendController(mcc) {
-    given HeaderCarrier = HeaderCarrier()
-    given FrontendAuthComponents = auth
-    
-    def viewLists = Action.async { implicit request => {
-        authActions.handle(
-            routes.CodeListsController.viewLists(),
-            r => {
-                val snapshots = Await.result(crdlConnector.fetchCodeListSnapShots(), Duration.Inf)
-                successful(Ok(listsPage(snapshots.sortWith((a, b) => a.codeListCode.toLowerCase() < b.codeListCode.toLowerCase()))))
+)(using ExecutionContext) extends FrontendController(mcc) with I18nSupport {    
+    def viewLists =
+        auth.authorizedAction(
+          continueUrl = routes.CodeListsController.viewLists(),
+          predicate = authActions.permission
+        ).async { implicit request =>
+            crdlConnector.fetchCodeListSnapShots().map { snapshots =>
+                val sortedSnapshots = snapshots.sortWith((a, b) => a.codeListCode.toLowerCase() < b.codeListCode.toLowerCase())
+                Ok(listsPage(sortedSnapshots))
             }
-        )
-    }}
+        }
 
-    def listDetail(code: String) = Action.async { implicit request => {
-        authActions.handle(
-            routes.CodeListsController.listDetail(code),
-            r => {
-                val snapshot = Await.result(crdlConnector.fetchCodeListSnapShots(), Duration.Inf)
-                    .find(s => s.codeListCode == code).getOrElse(null)
-                val codeLists = Await.result(crdlConnector.fetchCodeList(code), Duration.Inf)
-                successful(Ok(listDetailsPage(code, snapshot, codeLists)))
-            }
-        )
-    }}
+    def listDetail(code: String) =
+        auth.authorizedAction(
+          continueUrl = routes.CodeListsController.listDetail(code),
+          predicate = authActions.permission
+        ).async { implicit request => 
+                val codeListsFuture =  crdlConnector.fetchCodeList(code)
+                val snapshotsFuture =  crdlConnector.fetchCodeListSnapShots()
+                for {
+                    codeLists <- codeListsFuture
+                    snapshots <- snapshotsFuture
+                } yield {
+                    snapshots.find(s => s.codeListCode == code).fold {
+                        Ok(notFoundPage(
+                            (m: Messages) => m("error.codelist.snapshot.notfound.heading", code),
+                            (m: Messages) => m("error.codelist.snapshot.notfound.text", code)
+                        ))
+                    } { snapshot =>
+                        val test = codeLists(0).properties.fields.map((field, value) => s"$field - $value")
+                        Ok(listDetailsPage(code, snapshot, codeLists))
+                    }
+                }
+        }
 }

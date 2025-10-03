@@ -17,18 +17,15 @@
 package uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.controllers
 
 import javax.inject.{Inject, Singleton}
+import play.api.i18n.I18nSupport
 import play.api.mvc.MessagesControllerComponents
-import scala.concurrent.Future.successful
 import uk.gov.hmrc.crdlcacheadminfrontend.auth.AuthActions
 import uk.gov.hmrc.crdlcacheadminfrontend.connectors.CRDLConnector
-import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.CustomsOffice
 import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.views.html.{Offices, OfficeDetails}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.ExecutionContext
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
+import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.CustomsOffice
 
 @Singleton
 class CustomsOfficesController @Inject(
@@ -38,27 +35,25 @@ class CustomsOfficesController @Inject(
     mcc: MessagesControllerComponents,
     officesPage: Offices,
     officeDetailsPage: OfficeDetails
-)(using ExecutionContext) extends FrontendController(mcc) {
-    given HeaderCarrier = HeaderCarrier()
-    given FrontendAuthComponents = auth
-    
-    def viewOffices = Action.async { implicit request => {
-        authActions.handle(
-            routes.CustomsOfficesController.viewOffices(),
-            r => {
-                val customOffices = Await.result(crdlConnector.fetchCustomsOffices(), Duration.Inf)
-                successful(Ok(officesPage(customOffices.sortWith((a, b) => a.referenceNumber.toLowerCase() < b.referenceNumber.toLowerCase()))))
-            }
-        )
-    }}
+)(using ExecutionContext) extends FrontendController(mcc) with I18nSupport {    
+    def viewOffices =
+        auth.authorizedAction(
+            continueUrl = routes.CustomsOfficesController.viewOffices(),
+            predicate = authActions.permission
+        ).async { implicit request =>
+            crdlConnector.fetchCustomsOffices().map(customsOffices =>
+                val sortedOffices = customsOffices.sortWith((a, b) => a.referenceNumber.toLowerCase() < b.referenceNumber.toLowerCase())
+                Ok(officesPage(sortedOffices))
+            )
+        }
 
-    def officeDetail(referenceNumber: String) = Action.async { implicit request => {
-        authActions.handle(
-            routes.CustomsOfficesController.officeDetail(referenceNumber),
-            r => {
-                val customsOffice = Await.result(crdlConnector.fetchCustomsOffices(referenceNumbers = Some(Set(referenceNumber))), Duration.Inf)
-                successful(Ok(officeDetailsPage(customsOffice(0))))
-            }
-        )
-    }}
+    def officeDetail(referenceNumber: String) =
+        auth.authorizedAction(
+            continueUrl = routes.CustomsOfficesController.viewOffices(),
+            predicate = authActions.permission
+        ).async { implicit request =>
+            crdlConnector.fetchCustomsOffices(referenceNumbers = Some(Set(referenceNumber))).map(customsOffices =>
+                Ok(officeDetailsPage(CustomsOffice.toViewModel(customsOffices(0))))
+            )
+        }
 }

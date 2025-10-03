@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import play.api.libs.json.JsObject
 @import uk.gov.hmrc.crdlcacheadminfrontend.views.html.Layout
 @import uk.gov.hmrc.crdlcacheadminfrontend.views.html.components._
 @import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.{CodeListEntry, CodeListSnapshot}
@@ -28,6 +29,12 @@
 )
 
 @(code: String, snapshot: CodeListSnapshot, codeLists: List[CodeListEntry])(implicit request: RequestHeader, messages: Messages)
+
+@codeListProperties(properties: JsObject) = {
+    <ul class="govuk-list govuk-list--bullet govuk-!-margin-0">
+        @properties.fields.map { case (k, v) => <li class='govuk-!-margin-0'>@k: @v</li> }
+    </ul>
+}
 
 @layout(pageTitle = Some(pageTitle(messages("codeLists.listDetail.pageTitle", code)))) {   
     @heading(messages("codeLists.listDetail.pageTitle", code))
@@ -50,7 +57,7 @@
         rows = codeLists.map(cl => Seq(
             TableRow(content = Text(cl.key)),
             TableRow(content = Text(cl.value)),
-            TableRow(content = HtmlContent(formatCodeListProperties(cl.properties))),
+            TableRow(content = HtmlContent(codeListProperties(cl.properties))),
         ))
     ))
 }

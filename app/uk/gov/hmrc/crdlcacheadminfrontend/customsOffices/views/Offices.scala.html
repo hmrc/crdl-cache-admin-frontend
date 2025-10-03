@@ -23,7 +23,8 @@
 @this(
     layout: Layout,
     govukTable: GovukTable,
-    heading: Heading
+    heading: Heading,
+    link: Link
 )
 
 @(customsOffices: List[CustomsOffice])(implicit request: RequestHeader, messages: Messages)
@@ -41,7 +42,7 @@
             TableRow(content = Text(c.referenceNumber)),
             TableRow(content = Text(c.customsOfficeLsd.customsOfficeUsualName)),
             TableRow(content = Text(c.countryCode)),
-            TableRow(content = customOfficeDetailsLink(c.referenceNumber))
+            TableRow(content = HtmlContent(link(s"office-${c.referenceNumber}", messages("links.details"), officeDetailUrl(c.referenceNumber), Some(s"for customs office ${c.customsOfficeLsd.customsOfficeUsualName}"))))
         ))
     ))
 }

@@ -109,14 +109,11 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     val url = (referenceNumbers, countryCodes, roles, activeAt) match {
       case (None, None, None, None) => crdlCacheCustomsOfficesUrl
       case _ => crdlCacheCustomsOfficesUrl
-        .concat("?")
-        .concat(referenceNumbers.fold("")(r => s"referenceNumbers=${r.mkString(",")}"))
-        .concat(if (referenceNumbers.isEmpty) "" else "&")
-        .concat(countryCodes.fold("")(c => s"countryCodes=${c.mkString(",")}"))
-        .concat(if (referenceNumbers.isEmpty && countryCodes.isEmpty) "" else "&")
-        .concat(roles.fold("")(r => s"roles=${r.mkString(",")}"))
-        .concat(if (referenceNumbers.isEmpty && countryCodes.isEmpty && roles.isEmpty) "" else "&")
-        .concat(activeAt.fold("")(a => s"activeAt=${a}"))
+        .concat(Seq(
+          referenceNumbers.fold("")(r => s"referenceNumbers=${r.mkString(",")}"),
+          countryCodes.fold("")(c => s"countryCodes=${c.mkString(",")}"),
+          roles.fold("")(r => s"roles=${r.mkString(",")}")
+        ).filterNot(_.isEmpty).mkString("?", "&", ""))
     }
     url"$url"
   }
