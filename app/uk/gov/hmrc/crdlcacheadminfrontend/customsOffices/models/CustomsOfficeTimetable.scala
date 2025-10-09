@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crdlcacheadminfrontend
+package uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models
 
-import play.api.{Configuration, Environment}
-import play.api.inject.{Binding, Module => AppModule}
+import play.api.libs.json.*
+import java.time.LocalDate
 
-import java.time.Clock
+final case class CustomsOfficeTimetable(
+    seasonCode: Int,
+    seasonName: Option[String],
+    seasonStartDate: LocalDate,
+    seasonEndDate: LocalDate,
+    customsOfficeTimetableLine: List[CustomsOfficesTimetableLine]
+)
 
-class Module extends AppModule:
-
-  override def bindings(
-    environment  : Environment,
-    configuration: Configuration
-  ): Seq[Binding[_]] =
-    bind[Clock].toInstance(Clock.systemDefaultZone) :: // inject if current time needs to be controlled in unit tests
-    Nil
+object CustomsOfficeTimetable {
+  given Reads[CustomsOfficeTimetable] = Json.reads[CustomsOfficeTimetable]
+}

@@ -1,0 +1,183 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.crdlcacheadminfrontend.views.html.Layout
+@import uk.gov.hmrc.crdlcacheadminfrontend.views.html.components._
+@import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.viewModels.CustomsOfficeViewModel
+@import uk.gov.hmrc.crdlcacheadminfrontend.utils.ViewUtils.*
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+
+@this(
+    layout: Layout,
+    heading: Heading,
+    govukTable: GovukTable,
+    govukSummaryList: GovukSummaryList
+)
+
+@(customsOffice: CustomsOfficeViewModel)(implicit request: RequestHeader, messages: Messages)
+
+@layout(pageTitle = Some(pageTitle(messages("customsOffices.officeDetails.pageTitle", customsOffice.officeUsualName)))) {   
+    @heading(messages("customsOffices.officeDetails.pageTitle", customsOffice.officeUsualName))
+
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.ref"))), value = Value(Text(customsOffice.referenceNumber))),
+            SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.name"))), value = Value(Text(customsOffice.officeUsualName))),
+            SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.activeFrom"))), value = Value(Text(valueOrDefault(formatDateWithTime(customsOffice.activeFrom))))),
+            SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.activeTo"))), value = Value(Text(valueOrDefault(formatDateWithTime(customsOffice.activeTo)))))
+        )
+    ))
+    <ul class="govuk-list">
+        <li>
+            @govukSummaryList(SummaryList(
+                card = Some(Card(
+                    title = Some(CardTitle(
+                        content = Text(messages("customsOffices.officeDetails.summary.location.card"))
+                    ))
+                )),
+                rows = Seq(
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.city"))), value = Value(Text(customsOffice.location.city))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.country"))), value = Value(Text(customsOffice.location.country))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.region"))), value = Value(Text(optionOrDefault(customsOffice.location.region)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.location.keys.language"))), value = Value(Text(customsOffice.location.language)))
+                )
+            ))
+        </li>
+        
+        <li>
+            @govukSummaryList(SummaryList(
+                card = Some(Card(
+                    title = Some(CardTitle(
+                        content = Text(messages("customsOffices.officeDetails.summary.contact.card"))
+                    ))
+                )),
+                rows = Seq(
+                    SummaryListRow(
+                        key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.address"))),
+                        value = Value(HtmlContent(valueOrDefault(s"""
+                            <div>${customsOffice.contact.streetAndNumber}</div>
+                            <div>${customsOffice.location.city} ${customsOffice.contact.postalCode}</div>                            
+                        """)))
+                    ),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.telephone"))), value = Value(Text(optionOrDefault(customsOffice.contact.phoneNumber)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.fax"))), value = Value(Text(optionOrDefault(customsOffice.contact.faxNumber)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.telex"))), value = Value(Text(optionOrDefault(customsOffice.contact.telexNumber)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.contact.keys.email"))), value = Value(Text(optionOrDefault(customsOffice.contact.emailAddress))))
+                )
+            ))
+        </li>
+        
+        <li>
+            @govukSummaryList(SummaryList(
+                card = Some(Card(
+                    title = Some(CardTitle(
+                        content = Text(messages("customsOffices.officeDetails.summary.trader.card"))
+                    ))
+                )),
+                rows = Seq(
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.trader.keys.dedicated"))), value = Value(Text(displayBool(customsOffice.trader.traderDedicated)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.trader.keys.name"))), value = Value(Text(optionOrDefault(customsOffice.trader.dedicatedTraderName)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.trader.keys.language"))), value = Value(Text(optionOrDefault(customsOffice.trader.dedicatedTraderLanguageCode))))
+                )
+            ))
+        </li>
+        
+        <li>
+            @govukSummaryList(SummaryList(
+                card = Some(Card(
+                    title = Some(CardTitle(
+                        content = Text(messages("customsOffices.officeDetails.summary.specific.card"))
+                    ))
+                )),
+                rows = Seq(
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.nctsDate"))), value = Value(Text(optionOrDefault(customsOffice.specificInfo.nctsEntryDate)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.unLocode"))), value = Value(Text(optionOrDefault(customsOffice.specificInfo.unLocodeId)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.geo"))), value = Value(Text(optionOrDefault(customsOffice.specificInfo.geoInfoCode)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.notes"))), value = Value(Text(valueOrDefault(customsOffice.specificInfo.notes))))
+                )
+            ))
+        </li>
+        
+        <li>
+            @govukSummaryList(SummaryList(
+                card = Some(Card(
+                    title = Some(CardTitle(
+                        content = Text(messages("customsOffices.officeDetails.summary.related.card"))
+                    ))
+                )),
+                rows = Seq(
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.higher"))), value = Value(Text(optionOrDefault(customsOffice.references.numberHigherAuthority)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.main"))), value = Value(Text(optionOrDefault(customsOffice.references.numberMainOffice)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.enquiry"))), value = Value(Text(optionOrDefault(customsOffice.references.numberCompetentAuthorityOfEnquiry)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.recovery"))), value = Value(Text(optionOrDefault(customsOffice.references.numberCompetentAuthorityOfRecovery)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.nearest"))), value = Value(Text(optionOrDefault(customsOffice.references.nearestOffice)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.related.keys.takeover"))), value = Value(Text(optionOrDefault(customsOffice.references.numberTakeover))))
+                )
+            ))
+        </li>
+        
+        <li>
+            @govukSummaryList(SummaryList(
+                card = Some(Card(
+                    title = Some(CardTitle(
+                        content = Text(messages("customsOffices.officeDetails.summary.details.card"))
+                    ))
+                )),
+                rows = Seq(
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.prefixSuffixFlag"))), value = Value(Text(displayBool(customsOffice.details.prefixSuffixFlag)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.prefixSuffixLevel"))), value = Value(Text(optionOrDefault(customsOffice.details.prefixSuffixLevel)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.prefixSuffixName"))), value = Value(Text(optionOrDefault(customsOffice.details.prefixSuffixName)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.details.keys.spaceToAdd"))), value = Value(Text(displayBool(customsOffice.details.spaceToAdd))))
+                )
+            ))
+        </li>
+    </ul>
+
+    @heading(messages("customsOffices.officeDetails.timetables.heading"), Some(2), Some("m"))
+
+        @for(timetable <- customsOffice.timetables) {
+            @heading(s"${timetable.seasonCode} - ${optionOrDefault(timetable.seasonName, messages("customsOffices.officeDetails.timetables.heading.default"))}", Some(3), Some("s"))
+            @govukSummaryList(SummaryList(
+                rows = Seq(
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.timetables.startDate"))), value = Value(Text(formatLocalDate(timetable.seasonStartDate)))),
+                    SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.timetables.endDate"))), value = Value(Text(formatLocalDate(timetable.seasonEndDate)))),
+                )
+            ))
+            <ul class="govuk-list">
+                @for(timetableLine <- timetable.timetableLines) {
+                    <li>
+                        @govukSummaryList(SummaryList(
+                            card = Some(Card(
+                                title = Some(CardTitle(
+                                    content = Text(s"${timetableLine.dayInTheWeekBeginDay} ${messages("customsOffices.officeDetails.timetables.lines.to")} ${timetableLine.dayInTheWeekEndDay}")
+                                ))
+                            )),
+                            rows = Seq(
+                                SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.timetables.lines.period"))), value = Value(Text(s"${formatLocalTime(timetableLine.openingHoursTimeFirstPeriodFrom)} - ${formatLocalTime(timetableLine.openingHoursTimeFirstPeriodTo)}"))),
+                                SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.timetables.lines.periodSecond"))), value = Value(Text(s"${formatLocalTime(timetableLine.openingHoursTimeSecondPeriodFrom)} - ${formatLocalTime(timetableLine.openingHoursTimeSecondPeriodTo)}"))),
+                                SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.timetables.lines.roles"))), value = Value(Text(timetableLine.customsOfficeRoleTrafficCompetence.map(r => s"${r.roleName} (${r.trafficType})").mkString(", ")))),
+                            ))
+                        )
+                    </li>
+                }
+            </ul>
+        }
+}
+
+
+@{
+    //$COVERAGE-OFF$
+}

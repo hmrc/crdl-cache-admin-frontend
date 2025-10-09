@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crdlcacheadminfrontend
+package uk.gov.hmrc.crdlcacheadminfrontend.auth
 
-import play.api.{Configuration, Environment}
-import play.api.inject.{Binding, Module => AppModule}
+import uk.gov.hmrc.internalauth.client.IAAction
+import uk.gov.hmrc.internalauth.client.Predicate
+import uk.gov.hmrc.internalauth.client.Resource
+import uk.gov.hmrc.internalauth.client.ResourceLocation
+import uk.gov.hmrc.internalauth.client.ResourceType
 
-import java.time.Clock
-
-class Module extends AppModule:
-
-  override def bindings(
-    environment  : Environment,
-    configuration: Configuration
-  ): Seq[Binding[_]] =
-    bind[Clock].toInstance(Clock.systemDefaultZone) :: // inject if current time needs to be controlled in unit tests
-    Nil
+object Permissions {
+    val read = Predicate.Permission(
+        Resource(
+          ResourceType("crdl-cache"),
+          ResourceLocation("*")
+        ),
+        IAAction("READ"))
+}

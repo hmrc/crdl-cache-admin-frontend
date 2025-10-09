@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crdlcacheadminfrontend
+package uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models
 
-import play.api.{Configuration, Environment}
-import play.api.inject.{Binding, Module => AppModule}
+import play.api.libs.json.{Json, Reads}
 
-import java.time.Clock
+case class CodeListResponse(elements: List[CodeListEntry])
 
-class Module extends AppModule:
-
-  override def bindings(
-    environment  : Environment,
-    configuration: Configuration
-  ): Seq[Binding[_]] =
-    bind[Clock].toInstance(Clock.systemDefaultZone) :: // inject if current time needs to be controlled in unit tests
-    Nil
+object CodeListResponse {
+  given Reads[CodeListResponse] = Json.reads[CodeListResponse]
+}

@@ -1,10 +1,29 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
 @import uk.gov.hmrc.crdlcacheadminfrontend.config.AppConfig
+@import uk.gov.hmrc.crdlcacheadminfrontend.utils.ViewUtils
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardPage
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage.HmrcStandardPageParams
-
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
 @this(
   appConfig: AppConfig,
-  hmrcStandardPage: HmrcStandardPage
+  hmrcStandardPage: HmrcStandardPage,
+  govukServiceNavigation: GovukServiceNavigation
 )
 
 @(pageTitle: Option[String] = None)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
@@ -12,9 +31,28 @@
 @hmrcStandardPage(
   HmrcStandardPageParams(
     pageTitle = pageTitle,
-    isWelshTranslationAvailable = appConfig.welshLanguageSupportEnabled
+    isWelshTranslationAvailable = appConfig.welshLanguageSupportEnabled,
+    backLink = Some(BackLink.mimicsBrowserBackButtonViaJavaScript),
+    banners = Banners(
+      displayHmrcBanner = true
+    ),
+    serviceNavigation = Some(
+      ServiceNavigation(
+          navigation = Seq(
+              ServiceNavigationItem(
+                  content = Text(messages("serviceNavigation.codeLists")),
+                  href = ViewUtils.listsUrl
+              ),
+              ServiceNavigationItem(
+                  content = Text(messages("serviceNavigation.customsOffices")),
+                  href = ViewUtils.officesUrl
+              )
+          )
+      )
+    )
   )
 )(contentBlock)
+
 
 @{
     //$COVERAGE-OFF$

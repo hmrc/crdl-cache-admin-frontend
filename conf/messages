@@ -1,2 +1,102 @@
-service.name = crdl-cache-admin-frontend
-service.text = This is your new service
+service.name = Central Ref Data Library Admin
+service.text = Welcome to the Central Data Reference Library - Admin service
+
+page.title = {0} - CRDL Cache Admin
+
+links.details = Details
+
+########## Service Navigation
+serviceNavigation.codeLists = Code Lists
+serviceNavigation.customsOffices = Customs Offices
+
+serviceNavigation.epc = EPC Codes
+
+# serviceNavigation.cnCode = CN Codes
+# serviceNavigation.cnCodeWP = CN Code w/ EPC 
+# serviceNavigation.states = Member States
+# serviceNavigation.statesAndCountry = Member States & Countries
+# serviceNavigation.packaging = Packaging Types
+# serviceNavigation.transport = Transport Units
+# serviceNavigation.document = Type of Document
+# serviceNavigation.wine = Wine Operates
+
+########## Homepage
+homepage.pageTitle = Homepage
+
+########## Errors
+error.notfound = If you typed the web address, please check it is correct.
+error.codelist.snapshot.notfound.heading = Unable to load Code List {0}
+error.codelist.snapshot.notfound.text = No matching snapshot was found for the code list {0}. Unable to load code list data.
+
+########## CodeLists
+codeLists.viewLists.pageTitle = Code Lists
+codeLists.viewLists.table.headings.code = List Code
+codeLists.viewLists.table.headings.snapshot = Version
+codeLists.viewLists.table.headings.updated = Last Updated
+
+codeLists.listDetail.pageTitle = Code List Details: {0}
+codeLists.listDetail.properties.heading = Properties
+codeLists.listDetail.table.headings.key = Key
+codeLists.listDetail.table.headings.value = Value
+codeLists.listDetail.table.headings.properties = Properties
+
+########## Customs Offices
+customsOffices.viewOffices.pageTitle = Customs Offices
+customsOffices.viewOffices.table.headings.referenceNumber = Reference Number
+customsOffices.viewOffices.table.headings.countryCode = Reference Number
+customsOffices.viewOffices.table.headings.name = Office Name
+
+
+customsOffices.officeDetails.pageTitle = Customs Office: {0}
+
+customsOffices.officeDetails.summary.keys.ref = Reference Number
+customsOffices.officeDetails.summary.keys.name = Usual Name
+customsOffices.officeDetails.summary.keys.activeFrom = Active From
+customsOffices.officeDetails.summary.keys.activeTo = Active To
+
+customsOffices.officeDetails.summary.location.card = Location
+customsOffices.officeDetails.summary.location.keys.city = City
+customsOffices.officeDetails.summary.location.keys.country = Country Code
+customsOffices.officeDetails.summary.location.keys.region = Region Code
+customsOffices.officeDetails.summary.location.keys.language = Language Code
+
+customsOffices.officeDetails.summary.contact.card = Contact
+customsOffices.officeDetails.summary.contact.keys.address = Address
+customsOffices.officeDetails.summary.contact.keys.telephone = Telephone
+customsOffices.officeDetails.summary.contact.keys.fax = Fax
+customsOffices.officeDetails.summary.contact.keys.telex = Telex
+customsOffices.officeDetails.summary.contact.keys.email = Email
+
+customsOffices.officeDetails.summary.trader.card = Trader Info
+customsOffices.officeDetails.summary.trader.keys.dedicated = Dedicated Trader
+customsOffices.officeDetails.summary.trader.keys.name = Trader Name
+customsOffices.officeDetails.summary.trader.keys.language = Language Code
+
+customsOffices.officeDetails.summary.specific.card = Specific Information
+customsOffices.officeDetails.summary.specific.keys.nctsDate = NCTS Entry Date
+customsOffices.officeDetails.summary.specific.keys.unLocode = UN/LOCODE Id
+customsOffices.officeDetails.summary.specific.keys.geo = Geographic Code Id
+customsOffices.officeDetails.summary.specific.keys.notes = Notes Codes
+
+customsOffices.officeDetails.summary.related.card = Related Offices
+customsOffices.officeDetails.summary.related.keys.higher = Higher Authority
+customsOffices.officeDetails.summary.related.keys.main = Main Office
+customsOffices.officeDetails.summary.related.keys.enquiry = Competent Authority of Enquiry
+customsOffices.officeDetails.summary.related.keys.recovery = Competent Authority of Recovery
+customsOffices.officeDetails.summary.related.keys.nearest = Nearest Office
+customsOffices.officeDetails.summary.related.keys.takeover = Take Over Office
+
+customsOffices.officeDetails.summary.details.card = Additional Details
+customsOffices.officeDetails.summary.details.keys.prefixSuffixFlag = Prefix Suffix Flag
+customsOffices.officeDetails.summary.details.keys.prefixSuffixLevel = Prefix Suffix Level
+customsOffices.officeDetails.summary.details.keys.prefixSuffixName = Prefix Suffix Name
+customsOffices.officeDetails.summary.details.keys.spaceToAdd = Space to Add
+
+customsOffices.officeDetails.timetables.heading = Office Timetables
+customsOffices.officeDetails.timetables.heading.default = [Default Period]
+customsOffices.officeDetails.timetables.startDate = Start Date
+customsOffices.officeDetails.timetables.endDate = End Date
+customsOffices.officeDetails.timetables.lines.to = to
+customsOffices.officeDetails.timetables.lines.period = Opening hours
+customsOffices.officeDetails.timetables.lines.periodSecond = Opening hours (Secondary)
+customsOffices.officeDetails.timetables.lines.roles = Roles
