@@ -19,7 +19,7 @@ package uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.MessagesControllerComponents
-import uk.gov.hmrc.crdlcacheadminfrontend.auth.AuthActions
+import uk.gov.hmrc.crdlcacheadminfrontend.auth.Permissions
 import uk.gov.hmrc.crdlcacheadminfrontend.connectors.CRDLConnector
 import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.views.html.{Offices, OfficeDetails}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -29,8 +29,7 @@ import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.CustomsOffice
 
 @Singleton
 class CustomsOfficesController @Inject(
-    auth: FrontendAuthComponents, 
-    authActions: AuthActions,
+    auth: FrontendAuthComponents,
     crdlConnector: CRDLConnector,
     mcc: MessagesControllerComponents,
     officesPage: Offices,
@@ -39,7 +38,7 @@ class CustomsOfficesController @Inject(
     def viewOffices =
         auth.authorizedAction(
             continueUrl = routes.CustomsOfficesController.viewOffices(),
-            predicate = authActions.permission
+            predicate = Permissions.read
         ).async { implicit request =>
             crdlConnector.fetchCustomsOffices().map(customsOffices =>
                 val sortedOffices = customsOffices.sortWith((a, b) => a.referenceNumber.toLowerCase() < b.referenceNumber.toLowerCase())
@@ -50,7 +49,7 @@ class CustomsOfficesController @Inject(
     def officeDetail(referenceNumber: String) =
         auth.authorizedAction(
             continueUrl = routes.CustomsOfficesController.viewOffices(),
-            predicate = authActions.permission
+            predicate = Permissions.read
         ).async { implicit request =>
             crdlConnector.fetchCustomsOffices(referenceNumbers = Some(Set(referenceNumber))).map(customsOffices =>
                 Ok(officeDetailsPage(CustomsOffice.toViewModel(customsOffices(0))))

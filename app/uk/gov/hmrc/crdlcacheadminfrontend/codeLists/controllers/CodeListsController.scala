@@ -19,7 +19,7 @@ package uk.gov.hmrc.crdlcacheadminfrontend.codeLists.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.MessagesControllerComponents
-import uk.gov.hmrc.crdlcacheadminfrontend.auth.AuthActions
+import uk.gov.hmrc.crdlcacheadminfrontend.auth.Permissions
 import uk.gov.hmrc.crdlcacheadminfrontend.connectors.CRDLConnector
 import uk.gov.hmrc.crdlcacheadminfrontend.views.html.NotFound
 import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.views.html.{Lists, ListDetail}
@@ -31,7 +31,6 @@ import play.api.i18n.Messages
 @Singleton
 class CodeListsController @Inject(
     auth: FrontendAuthComponents, 
-    authActions: AuthActions,
     crdlConnector: CRDLConnector,
     mcc: MessagesControllerComponents,
     notFoundPage: NotFound,
@@ -41,7 +40,7 @@ class CodeListsController @Inject(
     def viewLists =
         auth.authorizedAction(
           continueUrl = routes.CodeListsController.viewLists(),
-          predicate = authActions.permission
+          predicate = Permissions.read
         ).async { implicit request =>
             crdlConnector.fetchCodeListSnapShots().map { snapshots =>
                 val sortedSnapshots = snapshots.sortWith((a, b) => a.codeListCode.toLowerCase() < b.codeListCode.toLowerCase())
@@ -52,7 +51,7 @@ class CodeListsController @Inject(
     def listDetail(code: String) =
         auth.authorizedAction(
           continueUrl = routes.CodeListsController.listDetail(code),
-          predicate = authActions.permission
+          predicate = Permissions.read
         ).async { implicit request => 
                 val codeListsFuture =  crdlConnector.fetchCodeList(code)
                 val snapshotsFuture =  crdlConnector.fetchCodeListSnapShots()
@@ -61,12 +60,12 @@ class CodeListsController @Inject(
                     snapshots <- snapshotsFuture
                 } yield {
                     snapshots.find(s => s.codeListCode == code).fold {
+                        val messages = summon[Messages]
                         Ok(notFoundPage(
-                            (m: Messages) => m("error.codelist.snapshot.notfound.heading", code),
-                            (m: Messages) => m("error.codelist.snapshot.notfound.text", code)
+                            messages("error.codelist.snapshot.notfound.heading", code),
+                            messages("error.codelist.snapshot.notfound.text", code)
                         ))
                     } { snapshot =>
-                        val test = codeLists(0).properties.fields.map((field, value) => s"$field - $value")
                         Ok(listDetailsPage(code, snapshot, codeLists))
                     }
                 }

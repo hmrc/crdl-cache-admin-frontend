@@ -16,30 +16,17 @@
 
 package uk.gov.hmrc.crdlcacheadminfrontend.auth
 
-import play.api.mvc.MessagesRequest
-import play.api.mvc.AnyContent
+import uk.gov.hmrc.internalauth.client.IAAction
 import uk.gov.hmrc.internalauth.client.Predicate
-import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
-import uk.gov.hmrc.internalauth.client.{AuthenticatedRequest, IAAction, Resource, ResourceLocation, ResourceType}
-import scala.concurrent.Future
-import play.api.mvc.{Call, Result}
+import uk.gov.hmrc.internalauth.client.Resource
+import uk.gov.hmrc.internalauth.client.ResourceLocation
+import uk.gov.hmrc.internalauth.client.ResourceType
 
-class AuthActions {
-    val permission = Predicate.Permission(
+object Permissions {
+    val read = Predicate.Permission(
         Resource(
           ResourceType("crdl-cache"),
           ResourceLocation("*")
         ),
         IAAction("READ"))
-        
-    def handle(
-        returnCall: Call,
-        block: AuthenticatedRequest[AnyContent, Unit] => Future[Result]
-    )(implicit auth: FrontendAuthComponents, request : MessagesRequest[AnyContent]) = 
-        auth.authorizedAction(
-            continueUrl = returnCall,
-            predicate   = permission
-        ).async{implicit request => {
-            block(request)
-        }}(request)
 }
