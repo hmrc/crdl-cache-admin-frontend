@@ -21,11 +21,11 @@ import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppConfig @Inject(servicesConfig: ServicesConfig)(val config: Configuration) {
+class AppConfig @Inject() (val config: Configuration) extends ServicesConfig(config)  {
   lazy val welshLanguageSupportEnabled: Boolean =
     config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
 
-  lazy val crdlCacheUrl: String = s"${servicesConfig.baseUrl("crdl-cache")}/crdl-cache"
+  lazy val crdlCacheUrl: String = s"${baseUrl("crdl-cache")}/crdl-cache"
 
   lazy val internalAuthToken: String = config.get[String]("internal-auth.token")
 }

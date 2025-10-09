@@ -1,0 +1,26 @@
+[
+  {
+    "key": "E600",
+    "value": "Saturated acyclic hydrocarbons Products falling within CN code 2901 10",
+    "properties": {
+      "unitOfMeasureCode": "1",
+      "degreePlatoApplicabilityFlag": false,
+      "actionIdentification": "1103",
+      "exciseProductsCategoryCode": "E",
+      "alcoholicStrengthApplicabilityFlag": false,
+      "densityApplicabilityFlag": false
+    }
+  },
+  {
+    "key": "T300",
+    "value": "Cigars & cigarillos",
+    "properties": {
+      "unitOfMeasureCode": "4",
+      "degreePlatoApplicabilityFlag": false,
+      "actionIdentification": "1116",
+      "exciseProductsCategoryCode": "T",
+      "alcoholicStrengthApplicabilityFlag": false,
+      "densityApplicabilityFlag": false
+    }
+  }
+]
