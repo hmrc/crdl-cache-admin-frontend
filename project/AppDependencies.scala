@@ -4,6 +4,7 @@ import sbt._
 object AppDependencies {
 
   private val bootstrapVersion = "10.1.0"
+  private val httpVerbsVersion = "15.6.0"
   private val playVersion = "play-30"
   
 
@@ -16,6 +17,7 @@ object AppDependencies {
 
   val test = Seq(
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"     % bootstrapVersion    % Test,
+    "uk.gov.hmrc"             %% "http-verbs-test-play-30"     % httpVerbsVersion % Test,
     "org.jsoup"               %  "jsoup"                      % "1.13.1"            % Test,
   )
 

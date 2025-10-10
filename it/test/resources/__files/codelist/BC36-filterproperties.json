@@ -1,0 +1,14 @@
+[
+  {
+    "key": "S200",
+    "value": "Spirituous beverages",
+    "properties": {
+      "unitOfMeasureCode": "3",
+      "degreePlatoApplicabilityFlag": false,
+      "actionIdentification": "1110",
+      "exciseProductsCategoryCode": "S",
+      "alcoholicStrengthApplicabilityFlag": true,
+      "densityApplicabilityFlag": false
+    }
+  }
+]
