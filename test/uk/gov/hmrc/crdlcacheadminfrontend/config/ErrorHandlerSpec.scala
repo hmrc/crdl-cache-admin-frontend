@@ -24,10 +24,7 @@ import play.api.Application
 import play.api.test.FakeRequest
 import play.api.inject.guice.GuiceApplicationBuilder
 
-class ErrorHandlerSpec extends AnyWordSpec
-  with Matchers
-  with GuiceOneAppPerSuite
-  with ScalaFutures:
+class ErrorHandlerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite with ScalaFutures:
 
   override def fakeApplication(): Application =
     new GuiceApplicationBuilder()
@@ -38,5 +35,6 @@ class ErrorHandlerSpec extends AnyWordSpec
 
   "standardErrorTemplate" should:
     "render HTML" in:
-      val html = handler.standardErrorTemplate("title", "heading", "message")(fakeRequest).futureValue
+      val html =
+        handler.standardErrorTemplate("title", "heading", "message")(fakeRequest).futureValue
       html.contentType shouldBe "text/html"

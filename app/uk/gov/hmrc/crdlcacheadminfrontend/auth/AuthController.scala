@@ -19,19 +19,20 @@ package uk.gov.hmrc.crdlcacheadminfrontend.auth
 import javax.inject.Inject
 import play.api.mvc.MessagesControllerComponents
 import scala.concurrent.Future.successful
-import uk.gov.hmrc.crdlcacheadminfrontend.auth.Permissions
 import uk.gov.hmrc.crdlcacheadminfrontend.controllers.routes
 import uk.gov.hmrc.crdlcacheadminfrontend.auth.routes as authRoutes
 import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-class AuthController @Inject()(auth: FrontendAuthComponents, mcc: MessagesControllerComponents)
+class AuthController @Inject() (auth: FrontendAuthComponents, mcc: MessagesControllerComponents)
   extends FrontendController(mcc) {
-    def signIn() =
-        auth.authorizedAction(
-            continueUrl = authRoutes.AuthController.signIn(),
-            predicate = Permissions.read
-        ).async { implicit request =>
-            successful(Redirect(routes.IndexController.onPageLoad()))
-        }
-    }
+  def signIn() =
+    auth
+      .authorizedAction(
+        continueUrl = authRoutes.AuthController.signIn(),
+        predicate = Permissions.read
+      )
+      .async { implicit request =>
+        successful(Redirect(routes.IndexController.onPageLoad()))
+      }
+}

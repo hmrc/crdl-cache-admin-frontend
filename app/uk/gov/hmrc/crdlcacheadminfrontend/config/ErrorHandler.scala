@@ -26,7 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class ErrorHandler @Inject()(
+class ErrorHandler @Inject() (
   errorTemplate: ErrorTemplate,
   val messagesApi: MessagesApi
 )(using

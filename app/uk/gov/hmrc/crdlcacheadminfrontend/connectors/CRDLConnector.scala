@@ -38,14 +38,18 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
 ) extends Retries
   with Logging {
   override protected def actorSystem: ActorSystem = system
-  override protected def configuration: Config = config.config.underlying
+  override protected def configuration: Config    = config.config.underlying
 
   private val crdlCacheCodeListsUrl      = s"${config.crdlCacheUrl}/lists"
   private val crdlCacheCustomsOfficesUrl = s"${config.crdlCacheUrl}/offices"
 
-  def fetchCodeListSnapShots()(using hc: HeaderCarrier, ex: ExecutionContext): Future[List[CodeListSnapshot]] = {
+  def fetchCodeListSnapShots()(using
+    hc: HeaderCarrier,
+    ex: ExecutionContext
+  ): Future[List[CodeListSnapshot]] = {
     // Use the internal-auth token to call the crdl-cache service
-    val hcWithInternalAuth = hc.copy(authorization = Some(Authorization((config.internalAuthToken))))
+    val hcWithInternalAuth =
+      hc.copy(authorization = Some(Authorization((config.internalAuthToken))))
     logger.info(s"Fetching codelist snapshots from crdl-cache")
     val fetchResult = retryFor(s"fetch of codelist snapshots") {
       // No point in retrying if our request is wrong
@@ -54,8 +58,8 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-      .get(url"${config.crdlCacheUrl}/lists")(using hcWithInternalAuth)
-      .execute[List[CodeListSnapshot]](using throwOnFailure(readEitherOf[List[CodeListSnapshot]]))
+        .get(url"${config.crdlCacheUrl}/lists")(using hcWithInternalAuth)
+        .execute[List[CodeListSnapshot]](using throwOnFailure(readEitherOf[List[CodeListSnapshot]]))
     }
     fetchResult.failed.foreach(err =>
       logger.error("Retries exceeded while fetching code list snapshots", err)
@@ -108,17 +112,20 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
   ): URL = {
     val url = (referenceNumbers, countryCodes, roles, activeAt) match {
       case (None, None, None, None) => crdlCacheCustomsOfficesUrl
-      case _ => crdlCacheCustomsOfficesUrl
-        .concat(Seq(
-          referenceNumbers.fold("")(r => s"referenceNumbers=${r.mkString(",")}"),
-          countryCodes.fold("")(c => s"countryCodes=${c.mkString(",")}"),
-          roles.fold("")(r => s"roles=${r.mkString(",")}")
-        ).filterNot(_.isEmpty).mkString("?", "&", ""))
+      case _ =>
+        crdlCacheCustomsOfficesUrl
+          .concat(
+            Seq(
+              referenceNumbers.fold("")(r => s"referenceNumbers=${r.mkString(",")}"),
+              countryCodes.fold("")(c => s"countryCodes=${c.mkString(",")}"),
+              roles.fold("")(r => s"roles=${r.mkString(",")}")
+            ).filterNot(_.isEmpty).mkString("?", "&", "")
+          )
     }
     url"$url"
   }
 
-  def fetchCustomsOffices (
+  def fetchCustomsOffices(
     referenceNumbers: Option[Set[String]] = None,
     countryCodes: Option[Set[String]] = None,
     roles: Option[Set[String]] = None,
@@ -126,12 +133,18 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
   )(using hc: HeaderCarrier, ec: ExecutionContext): Future[List[CustomsOffice]] = {
     val hcWithInternalAuth = hc.copy(authorization = Some(Authorization(config.internalAuthToken)))
     logger.info(s"Fetching customs offices from crdl-cache")
-    val fetchResult = retryFor(referenceNumbers.fold(s"fetching all customs offices")(r => s"fetching customs offices for ${r.mkString(",")}")) {
+    val fetchResult = retryFor(
+      referenceNumbers.fold(s"fetching all customs offices")(r =>
+        s"fetching customs offices for ${r.mkString(",")}"
+      )
+    ) {
       case Upstream4xxResponse(_) => false
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-        .get(urlForCustomsOffices(referenceNumbers = referenceNumbers, countryCodes, roles, activeAt))(using hcWithInternalAuth)
+        .get(
+          urlForCustomsOffices(referenceNumbers = referenceNumbers, countryCodes, roles, activeAt)
+        )(using hcWithInternalAuth)
         .execute[List[CustomsOffice]](using throwOnFailure(readEitherOf[List[CustomsOffice]]))
     }
     fetchResult.failed.foreach(err =>

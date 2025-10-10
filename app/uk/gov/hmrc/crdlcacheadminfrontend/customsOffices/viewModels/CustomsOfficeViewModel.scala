@@ -22,85 +22,83 @@ import java.time.DayOfWeek
 import java.time.LocalTime
 
 final case class CustomsOfficeViewModel(
-    referenceNumber: String,
-    officeUsualName: String,
-    activeFrom: Option[Instant],
-    activeTo: Option[Instant],
-
-    location: Location,
-    contact: Contact,
-    trader: Trader,
-    specificInfo: SpecificInfo,
-    references: References,
-    details: Details,
-    timetables: List[Timetable]
-
+  referenceNumber: String,
+  officeUsualName: String,
+  activeFrom: Option[Instant],
+  activeTo: Option[Instant],
+  location: Location,
+  contact: Contact,
+  trader: Trader,
+  specificInfo: SpecificInfo,
+  references: References,
+  details: Details,
+  timetables: List[Timetable]
 )
 
 final case class Location(
-    city: String,
-    country: String,
-    region: Option[String],
-    language: String
+  city: String,
+  country: String,
+  region: Option[String],
+  language: String
 )
 
 final case class Contact(
-    streetAndNumber: String,
-    postalCode: String,
-    phoneNumber: Option[String],
-    faxNumber: Option[String],
-    telexNumber: Option[String],
-    emailAddress: Option[String]
+  streetAndNumber: String,
+  postalCode: String,
+  phoneNumber: Option[String],
+  faxNumber: Option[String],
+  telexNumber: Option[String],
+  emailAddress: Option[String]
 )
 
 final case class Trader(
-    traderDedicated: Boolean,
-    dedicatedTraderName: Option[String],
-    dedicatedTraderLanguageCode: Option[String]
+  traderDedicated: Boolean,
+  dedicatedTraderName: Option[String],
+  dedicatedTraderLanguageCode: Option[String]
 )
 
 final case class SpecificInfo(
-    nctsEntryDate: Option[LocalDate],
-    unLocodeId: Option[String],
-    geoInfoCode: Option[String],
-    notes: String
+  nctsEntryDate: Option[LocalDate],
+  unLocodeId: Option[String],
+  geoInfoCode: Option[String],
+  notes: String
 )
 
 final case class References(
-    numberHigherAuthority: Option[String],
-    numberMainOffice: Option[String],
-    numberCompetentAuthorityOfEnquiry: Option[String],
-    numberCompetentAuthorityOfRecovery: Option[String],
-    nearestOffice: Option[String],
-    numberTakeover: Option[String]
+  numberHigherAuthority: Option[String],
+  numberMainOffice: Option[String],
+  numberCompetentAuthorityOfEnquiry: Option[String],
+  numberCompetentAuthorityOfRecovery: Option[String],
+  nearestOffice: Option[String],
+  numberTakeover: Option[String]
 )
 
 final case class Details(
-    prefixSuffixFlag: Boolean,
-    prefixSuffixLevel: Option[String],
-    prefixSuffixName: Option[String],
-    spaceToAdd: Boolean
+  prefixSuffixFlag: Boolean,
+  prefixSuffixLevel: Option[String],
+  prefixSuffixName: Option[String],
+  spaceToAdd: Boolean
 )
 
 final case class Timetable(
-    seasonCode: Int,
-    seasonName: Option[String],
-    seasonStartDate: LocalDate,
-    seasonEndDate: LocalDate,
-    timetableLines: List[TimetableLine]
+  seasonCode: Int,
+  seasonName: Option[String],
+  seasonStartDate: LocalDate,
+  seasonEndDate: LocalDate,
+  timetableLines: List[TimetableLine]
 )
 
 final case class TimetableLine(
-    dayInTheWeekBeginDay: DayOfWeek,
-    dayInTheWeekEndDay: DayOfWeek,
-    openingHoursTimeFirstPeriodFrom: LocalTime,
-    openingHoursTimeFirstPeriodTo: LocalTime,
-    openingHoursTimeSecondPeriodFrom: Option[LocalTime],
-    openingHoursTimeSecondPeriodTo: Option[LocalTime],
-    customsOfficeRoleTrafficCompetence: List[Competance]
+  dayInTheWeekBeginDay: DayOfWeek,
+  dayInTheWeekEndDay: DayOfWeek,
+  openingHoursTimeFirstPeriodFrom: LocalTime,
+  openingHoursTimeFirstPeriodTo: LocalTime,
+  openingHoursTimeSecondPeriodFrom: Option[LocalTime],
+  openingHoursTimeSecondPeriodTo: Option[LocalTime],
+  customsOfficeRoleTrafficCompetence: List[Competance]
 )
 
 final case class Competance(
-    roleName: String,
-    trafficType: String
+  roleName: String,
+  trafficType: String
 )

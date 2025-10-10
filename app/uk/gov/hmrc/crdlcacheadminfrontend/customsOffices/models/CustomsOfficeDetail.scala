@@ -19,14 +19,14 @@ package uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models
 import play.api.libs.json.*
 
 final case class CustomsOfficeDetail(
-    customsOfficeUsualName: String,
-    languageCode: String,
-    city: String,
-    prefixSuffixFlag: Boolean,
-    prefixSuffixLevel: Option[String],
-    prefixSuffixName: Option[String],
-    spaceToAdd: Boolean,
-    streetAndNumber: String
+  customsOfficeUsualName: String,
+  languageCode: String,
+  city: String,
+  prefixSuffixFlag: Boolean,
+  prefixSuffixLevel: Option[String],
+  prefixSuffixName: Option[String],
+  spaceToAdd: Boolean,
+  streetAndNumber: String
 )
 
 object CustomsOfficeDetail {
