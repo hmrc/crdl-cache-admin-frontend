@@ -27,4 +27,3 @@ case class CodeListEntry(
 object CodeListEntry {
   given Reads[CodeListEntry] = Json.reads[CodeListEntry]
 }
-

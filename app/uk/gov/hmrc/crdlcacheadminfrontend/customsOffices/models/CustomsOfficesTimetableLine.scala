@@ -21,16 +21,16 @@ import java.time.DayOfWeek
 import java.time.LocalTime
 
 final case class CustomsOfficesTimetableLine(
-    dayInTheWeekBeginDay: DayOfWeek,
-    dayInTheWeekEndDay: DayOfWeek,
-    openingHoursTimeFirstPeriodFrom: LocalTime,
-    openingHoursTimeFirstPeriodTo: LocalTime,
-    openingHoursTimeSecondPeriodFrom: Option[LocalTime],
-    openingHoursTimeSecondPeriodTo: Option[LocalTime],
-    customsOfficeRoleTrafficCompetence: List[CustomsOfficeRoleTrafficCompetence]
+  dayInTheWeekBeginDay: DayOfWeek,
+  dayInTheWeekEndDay: DayOfWeek,
+  openingHoursTimeFirstPeriodFrom: LocalTime,
+  openingHoursTimeFirstPeriodTo: LocalTime,
+  openingHoursTimeSecondPeriodFrom: Option[LocalTime],
+  openingHoursTimeSecondPeriodTo: Option[LocalTime],
+  customsOfficeRoleTrafficCompetence: List[CustomsOfficeRoleTrafficCompetence]
 )
 
 object CustomsOfficesTimetableLine {
-  given Format[DayOfWeek] = Format.of[Int].bimap(DayOfWeek.of, _.getValue)
+  given Format[DayOfWeek]                  = Format.of[Int].bimap(DayOfWeek.of, _.getValue)
   given Reads[CustomsOfficesTimetableLine] = Json.reads[CustomsOfficesTimetableLine]
 }

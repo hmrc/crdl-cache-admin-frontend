@@ -24,26 +24,29 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 object ViewUtils {
-    def pageTitle(title: String)(implicit messages: Messages) =
-        messages("page.title", title)
+  def pageTitle(title: String)(implicit messages: Messages) =
+    messages("page.title", title)
 
-    val baseUrl = "crdl-cache-admin-frontend"
+  val baseUrl = "crdl-cache-admin-frontend"
 
-    def withBaseUrl(url: String): String = s"/$baseUrl/$url"
+  def withBaseUrl(url: String): String = s"/$baseUrl/$url"
 
-    val listsUrl = withBaseUrl("lists")
-    def listDetailUrl(code: String) = withBaseUrl(s"lists/$code")
+  val listsUrl                    = withBaseUrl("lists")
+  def listDetailUrl(code: String) = withBaseUrl(s"lists/$code")
 
-    val officesUrl = withBaseUrl("offices")
-    def officeDetailUrl(referenceNumber: String) = withBaseUrl(s"offices/$referenceNumber")
+  val officesUrl                               = withBaseUrl("offices")
+  def officeDetailUrl(referenceNumber: String) = withBaseUrl(s"offices/$referenceNumber")
 
-    def formatDateWithTime(instant: Option[Instant]): String = instant.fold("")(i => DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")).format(i))
-    def formatLocalDate(date: LocalDate): String = DateTimeFormatter.ISO_DATE.format(date)
-    def formatLocalTime(time: LocalTime): String = DateTimeFormatter.ISO_TIME.format(time)
-    def formatLocalTime(time: Option[LocalTime]): String = time.fold("")(t => formatLocalTime(t))
+  def formatDateWithTime(instant: Option[Instant]): String =
+    instant.fold("")(i => DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")).format(i))
+  def formatLocalDate(date: LocalDate): String         = DateTimeFormatter.ISO_DATE.format(date)
+  def formatLocalTime(time: LocalTime): String         = DateTimeFormatter.ISO_TIME.format(time)
+  def formatLocalTime(time: Option[LocalTime]): String = time.fold("")(t => formatLocalTime(t))
 
-    val defaultVal = "-"
-    def valueOrDefault(value: String, default: String = defaultVal): String = if (value.trim.isEmpty()) default else value
-    def optionOrDefault[A](value: Option[A], default: String = defaultVal): String = value.fold(default)(_.toString())
-    def displayBool(value: Boolean): String = if (value) "True" else "False"
+  val defaultVal = "-"
+  def valueOrDefault(value: String, default: String = defaultVal): String =
+    if (value.trim.isEmpty()) default else value
+  def optionOrDefault[A](value: Option[A], default: String = defaultVal): String =
+    value.fold(default)(_.toString())
+  def displayBool(value: Boolean): String = if (value) "True" else "False"
 }

@@ -19,8 +19,8 @@ package uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models
 import play.api.libs.json.*
 
 final case class CustomsOfficeRoleTrafficCompetence(
-    roleName: String,
-    trafficType: String
+  roleName: String,
+  trafficType: String
 )
 
 object CustomsOfficeRoleTrafficCompetence {

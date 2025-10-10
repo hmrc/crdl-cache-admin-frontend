@@ -29,45 +29,56 @@ import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
 import play.api.i18n.Messages
 
 @Singleton
-class CodeListsController @Inject(
-    auth: FrontendAuthComponents, 
-    crdlConnector: CRDLConnector,
-    mcc: MessagesControllerComponents,
-    notFoundPage: NotFound,
-    listsPage: Lists,
-    listDetailsPage: ListDetail
-)(using ExecutionContext) extends FrontendController(mcc) with I18nSupport {    
-    def viewLists =
-        auth.authorizedAction(
-          continueUrl = routes.CodeListsController.viewLists(),
-          predicate = Permissions.read
-        ).async { implicit request =>
-            crdlConnector.fetchCodeListSnapShots().map { snapshots =>
-                val sortedSnapshots = snapshots.sortWith((a, b) => a.codeListCode.toLowerCase() < b.codeListCode.toLowerCase())
-                Ok(listsPage(sortedSnapshots))
+class CodeListsController @Inject (
+  auth: FrontendAuthComponents,
+  crdlConnector: CRDLConnector,
+  mcc: MessagesControllerComponents,
+  notFoundPage: NotFound,
+  listsPage: Lists,
+  listDetailsPage: ListDetail
+)(using ExecutionContext)
+  extends FrontendController(mcc)
+  with I18nSupport {
+  def viewLists =
+    auth
+      .authorizedAction(
+        continueUrl = routes.CodeListsController.viewLists(),
+        predicate = Permissions.read
+      )
+      .async { implicit request =>
+        crdlConnector.fetchCodeListSnapShots().map { snapshots =>
+          val sortedSnapshots = snapshots
+            .sortWith((a, b) => a.codeListCode.toLowerCase() < b.codeListCode.toLowerCase())
+          Ok(listsPage(sortedSnapshots))
+        }
+      }
+
+  def listDetail(code: String) =
+    auth
+      .authorizedAction(
+        continueUrl = routes.CodeListsController.listDetail(code),
+        predicate = Permissions.read
+      )
+      .async { implicit request =>
+        val codeListsFuture = crdlConnector.fetchCodeList(code)
+        val snapshotsFuture = crdlConnector.fetchCodeListSnapShots()
+        for {
+          codeLists <- codeListsFuture
+          snapshots <- snapshotsFuture
+        } yield {
+          snapshots
+            .find(s => s.codeListCode == code)
+            .fold {
+              val messages = summon[Messages]
+              Ok(
+                notFoundPage(
+                  messages("error.codelist.snapshot.notfound.heading", code),
+                  messages("error.codelist.snapshot.notfound.text", code)
+                )
+              )
+            } { snapshot =>
+              Ok(listDetailsPage(code, snapshot, codeLists))
             }
         }
-
-    def listDetail(code: String) =
-        auth.authorizedAction(
-          continueUrl = routes.CodeListsController.listDetail(code),
-          predicate = Permissions.read
-        ).async { implicit request => 
-                val codeListsFuture =  crdlConnector.fetchCodeList(code)
-                val snapshotsFuture =  crdlConnector.fetchCodeListSnapShots()
-                for {
-                    codeLists <- codeListsFuture
-                    snapshots <- snapshotsFuture
-                } yield {
-                    snapshots.find(s => s.codeListCode == code).fold {
-                        val messages = summon[Messages]
-                        Ok(notFoundPage(
-                            messages("error.codelist.snapshot.notfound.heading", code),
-                            messages("error.codelist.snapshot.notfound.text", code)
-                        ))
-                    } { snapshot =>
-                        Ok(listDetailsPage(code, snapshot, codeLists))
-                    }
-                }
-        }
+      }
 }

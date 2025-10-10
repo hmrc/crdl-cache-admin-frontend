@@ -25,18 +25,20 @@ import uk.gov.hmrc.crdlcacheadminfrontend.views.html.Index
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
 
-
 @Singleton
-class IndexController @Inject()(
+class IndexController @Inject() (
   auth: FrontendAuthComponents,
   mcc: MessagesControllerComponents,
   indexPage: Index
-) extends FrontendController(mcc) with I18nSupport {
-    def onPageLoad() = 
-      auth.authorizedAction(
-          continueUrl = routes.IndexController.onPageLoad(),
-          predicate = Permissions.read
-      ).async { implicit request =>
-          successful(Ok(indexPage()))
+) extends FrontendController(mcc)
+  with I18nSupport {
+  def onPageLoad() =
+    auth
+      .authorizedAction(
+        continueUrl = routes.IndexController.onPageLoad(),
+        predicate = Permissions.read
+      )
+      .async { implicit request =>
+        successful(Ok(indexPage()))
       }
 }

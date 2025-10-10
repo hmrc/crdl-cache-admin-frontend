@@ -28,31 +28,42 @@ import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
 import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.CustomsOffice
 
 @Singleton
-class CustomsOfficesController @Inject(
-    auth: FrontendAuthComponents,
-    crdlConnector: CRDLConnector,
-    mcc: MessagesControllerComponents,
-    officesPage: Offices,
-    officeDetailsPage: OfficeDetails
-)(using ExecutionContext) extends FrontendController(mcc) with I18nSupport {    
-    def viewOffices =
-        auth.authorizedAction(
-            continueUrl = routes.CustomsOfficesController.viewOffices(),
-            predicate = Permissions.read
-        ).async { implicit request =>
-            crdlConnector.fetchCustomsOffices().map(customsOffices =>
-                val sortedOffices = customsOffices.sortWith((a, b) => a.referenceNumber.toLowerCase() < b.referenceNumber.toLowerCase())
-                Ok(officesPage(sortedOffices))
-            )
-        }
+class CustomsOfficesController @Inject (
+  auth: FrontendAuthComponents,
+  crdlConnector: CRDLConnector,
+  mcc: MessagesControllerComponents,
+  officesPage: Offices,
+  officeDetailsPage: OfficeDetails
+)(using ExecutionContext)
+  extends FrontendController(mcc)
+  with I18nSupport {
+  def viewOffices =
+    auth
+      .authorizedAction(
+        continueUrl = routes.CustomsOfficesController.viewOffices(),
+        predicate = Permissions.read
+      )
+      .async { implicit request =>
+        crdlConnector
+          .fetchCustomsOffices()
+          .map(customsOffices =>
+            val sortedOffices = customsOffices
+              .sortWith((a, b) => a.referenceNumber.toLowerCase() < b.referenceNumber.toLowerCase())
+            Ok(officesPage(sortedOffices))
+          )
+      }
 
-    def officeDetail(referenceNumber: String) =
-        auth.authorizedAction(
-            continueUrl = routes.CustomsOfficesController.viewOffices(),
-            predicate = Permissions.read
-        ).async { implicit request =>
-            crdlConnector.fetchCustomsOffices(referenceNumbers = Some(Set(referenceNumber))).map(customsOffices =>
-                Ok(officeDetailsPage(CustomsOffice.toViewModel(customsOffices(0))))
-            )
-        }
+  def officeDetail(referenceNumber: String) =
+    auth
+      .authorizedAction(
+        continueUrl = routes.CustomsOfficesController.viewOffices(),
+        predicate = Permissions.read
+      )
+      .async { implicit request =>
+        crdlConnector
+          .fetchCustomsOffices(referenceNumbers = Some(Set(referenceNumber)))
+          .map(customsOffices =>
+            Ok(officeDetailsPage(CustomsOffice.toViewModel(customsOffices(0))))
+          )
+      }
 }

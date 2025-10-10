@@ -23,10 +23,11 @@ import uk.gov.hmrc.internalauth.client.ResourceLocation
 import uk.gov.hmrc.internalauth.client.ResourceType
 
 object Permissions {
-    val read = Predicate.Permission(
-        Resource(
-          ResourceType("crdl-cache"),
-          ResourceLocation("*")
-        ),
-        IAAction("READ"))
+  val read = Predicate.Permission(
+    Resource(
+      ResourceType("crdl-cache"),
+      ResourceLocation("*")
+    ),
+    IAAction("READ")
+  )
 }
