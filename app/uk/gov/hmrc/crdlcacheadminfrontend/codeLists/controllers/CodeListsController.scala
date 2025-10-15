@@ -18,15 +18,15 @@ package uk.gov.hmrc.crdlcacheadminfrontend.codeLists.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.crdlcacheadminfrontend.auth.Permissions
 import uk.gov.hmrc.crdlcacheadminfrontend.connectors.CRDLConnector
 import uk.gov.hmrc.crdlcacheadminfrontend.views.html.NotFound
-import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.views.html.{Lists, ListDetail}
+import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.views.html.{ListDetail, Lists}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
-import play.api.i18n.Messages
 
 @Singleton
 class CodeListsController @Inject (
@@ -39,7 +39,7 @@ class CodeListsController @Inject (
 )(using ExecutionContext)
   extends FrontendController(mcc)
   with I18nSupport {
-  def viewLists =
+  def viewLists: Action[AnyContent] =
     auth
       .authorizedAction(
         continueUrl = routes.CodeListsController.viewLists(),
@@ -53,13 +53,14 @@ class CodeListsController @Inject (
         }
       }
 
-  def listDetail(code: String) =
+  def listDetail(code: String): Action[AnyContent] =
     auth
       .authorizedAction(
         continueUrl = routes.CodeListsController.listDetail(code),
         predicate = Permissions.read
       )
       .async { implicit request =>
+        val messages        = request.messages
         val codeListsFuture = crdlConnector.fetchCodeList(code)
         val snapshotsFuture = crdlConnector.fetchCodeListSnapShots()
         for {
@@ -69,7 +70,6 @@ class CodeListsController @Inject (
           snapshots
             .find(s => s.codeListCode == code)
             .fold {
-              val messages = summon[Messages]
               Ok(
                 notFoundPage(
                   messages("error.codelist.snapshot.notfound.heading", code),
