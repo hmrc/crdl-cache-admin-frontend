@@ -20,11 +20,11 @@ import play.api.libs.json.*
 import java.time.LocalDate
 
 final case class CustomsOfficeTimetable(
-    seasonCode: Int,
-    seasonName: Option[String],
-    seasonStartDate: LocalDate,
-    seasonEndDate: LocalDate,
-    customsOfficeTimetableLine: List[CustomsOfficesTimetableLine]
+  seasonCode: Int,
+  seasonName: Option[String],
+  seasonStartDate: LocalDate,
+  seasonEndDate: LocalDate,
+  customsOfficeTimetableLine: List[CustomsOfficesTimetableLine]
 )
 
 object CustomsOfficeTimetable {

@@ -22,31 +22,31 @@ import java.time.LocalDate
 import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.viewModels.*
 
 final case class CustomsOffice(
-    referenceNumber: String,
-    activeFrom: Option[Instant],
-    activeTo: Option[Instant],
-    referenceNumberMainOffice: Option[String],
-    referenceNumberHigherAuthority: Option[String],
-    referenceNumberCompetentAuthorityOfEnquiry: Option[String],
-    referenceNumberCompetentAuthorityOfRecovery: Option[String],
-    referenceNumberTakeover: Option[String],
-    countryCode: String,
-    emailAddress: Option[String],
-    unLocodeId: Option[String],
-    nctsEntryDate: Option[LocalDate],
-    nearestOffice: Option[String],
-    postalCode: String,
-    phoneNumber: Option[String],
-    faxNumber: Option[String],
-    telexNumber: Option[String],
-    geoInfoCode: Option[String],
-    regionCode: Option[String],
-    traderDedicated: Boolean,
-    dedicatedTraderLanguageCode: Option[String],
-    dedicatedTraderName: Option[String],
-    customsOfficeSpecificNotesCodes: List[String],
-    customsOfficeLsd: CustomsOfficeDetail,
-    customsOfficeTimetable: List[CustomsOfficeTimetable]
+  referenceNumber: String,
+  activeFrom: Option[Instant],
+  activeTo: Option[Instant],
+  referenceNumberMainOffice: Option[String],
+  referenceNumberHigherAuthority: Option[String],
+  referenceNumberCompetentAuthorityOfEnquiry: Option[String],
+  referenceNumberCompetentAuthorityOfRecovery: Option[String],
+  referenceNumberTakeover: Option[String],
+  countryCode: String,
+  emailAddress: Option[String],
+  unLocodeId: Option[String],
+  nctsEntryDate: Option[LocalDate],
+  nearestOffice: Option[String],
+  postalCode: String,
+  phoneNumber: Option[String],
+  faxNumber: Option[String],
+  telexNumber: Option[String],
+  geoInfoCode: Option[String],
+  regionCode: Option[String],
+  traderDedicated: Boolean,
+  dedicatedTraderLanguageCode: Option[String],
+  dedicatedTraderName: Option[String],
+  customsOfficeSpecificNotesCodes: List[String],
+  customsOfficeLsd: CustomsOfficeDetail,
+  customsOfficeTimetable: List[CustomsOfficeTimetable]
 )
 
 object CustomsOffice {
@@ -57,14 +57,12 @@ object CustomsOffice {
     officeUsualName = value.customsOfficeLsd.customsOfficeUsualName,
     activeFrom = value.activeFrom,
     activeTo = value.activeFrom,
-
     location = Location(
       city = value.customsOfficeLsd.city,
       country = value.countryCode,
       region = value.regionCode,
       language = value.customsOfficeLsd.languageCode
     ),
-
     contact = Contact(
       streetAndNumber = value.customsOfficeLsd.streetAndNumber,
       postalCode = value.postalCode,
@@ -73,20 +71,17 @@ object CustomsOffice {
       telexNumber = value.telexNumber,
       emailAddress = value.emailAddress
     ),
-
     trader = Trader(
       traderDedicated = value.traderDedicated,
       dedicatedTraderName = value.dedicatedTraderName,
       dedicatedTraderLanguageCode = value.dedicatedTraderLanguageCode
     ),
-
     specificInfo = SpecificInfo(
       nctsEntryDate = value.nctsEntryDate,
       unLocodeId = value.unLocodeId,
       geoInfoCode = value.geoInfoCode,
       notes = value.customsOfficeSpecificNotesCodes.mkString(", ")
     ),
-
     references = References(
       numberHigherAuthority = value.referenceNumberHigherAuthority,
       numberMainOffice = value.referenceNumberMainOffice,
@@ -95,14 +90,12 @@ object CustomsOffice {
       nearestOffice = value.nearestOffice,
       numberTakeover = value.referenceNumberTakeover
     ),
-    
     details = Details(
       prefixSuffixFlag = value.customsOfficeLsd.prefixSuffixFlag,
       prefixSuffixLevel = value.customsOfficeLsd.prefixSuffixLevel,
       prefixSuffixName = value.customsOfficeLsd.prefixSuffixName,
       spaceToAdd = value.customsOfficeLsd.spaceToAdd
     ),
-
     timetables = value.customsOfficeTimetable.map(cot =>
       Timetable(
         seasonCode = cot.seasonCode,
@@ -117,8 +110,8 @@ object CustomsOffice {
             openingHoursTimeFirstPeriodTo = cotLine.openingHoursTimeFirstPeriodTo,
             openingHoursTimeSecondPeriodFrom = cotLine.openingHoursTimeSecondPeriodFrom,
             openingHoursTimeSecondPeriodTo = cotLine.openingHoursTimeSecondPeriodTo,
-            customsOfficeRoleTrafficCompetence = cotLine.customsOfficeRoleTrafficCompetence.map(rtc =>
-              Competance(rtc.roleName, rtc.trafficType)
+            customsOfficeRoleTrafficCompetence = cotLine.customsOfficeRoleTrafficCompetence.map(
+              rtc => Competance(rtc.roleName, rtc.trafficType)
             )
           )
         )

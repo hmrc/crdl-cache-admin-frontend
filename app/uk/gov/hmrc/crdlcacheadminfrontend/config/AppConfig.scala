@@ -21,7 +21,7 @@ import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppConfig @Inject() (val config: Configuration) extends ServicesConfig(config)  {
+class AppConfig @Inject() (val config: Configuration) extends ServicesConfig(config) {
   lazy val welshLanguageSupportEnabled: Boolean =
     config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
 
