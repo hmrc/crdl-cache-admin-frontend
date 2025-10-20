@@ -30,6 +30,7 @@ import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import java.util.UUID
+import uk.gov.hmrc.http.Authorization
 
 class CRDLConnectorSpec
   extends AsyncFlatSpec
@@ -37,7 +38,7 @@ class CRDLConnectorSpec
   with WireMockSupport
   with HttpClientV2Support {
   given ActorSystem   = ActorSystem("test")
-  given HeaderCarrier = HeaderCarrier()
+  given HeaderCarrier = HeaderCarrier(authorization = Some(Authorization(authToken)))
 
   private val authToken = UUID.randomUUID().toString
 
@@ -45,7 +46,6 @@ class CRDLConnectorSpec
     Configuration(
       "microservice.services.crdl-cache.host" -> "localhost",
       "microservice.services.crdl-cache.port" -> wireMockPort,
-      "internal-auth.token"                   -> authToken,
       "http-verbs.retries.intervals"          -> List("1.millis")
     )
   )

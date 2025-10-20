@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crdlcacheadminfrontend.config
+package uk.gov.hmrc.crdlcacheadminfrontend.utils
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.http.HeaderCarrier
 
-@Singleton
-class AppConfig @Inject() (val config: Configuration) extends ServicesConfig(config) {
-  lazy val welshLanguageSupportEnabled: Boolean =
-    config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
-
-  lazy val crdlCacheUrl: String = s"${baseUrl("crdl-cache")}/crdl-cache"
+object HeaderUtils {
+  def getAuthorization(h: HeaderCarrier) = h.authorization.fold("")(a => a.value)
 }

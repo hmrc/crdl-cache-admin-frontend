@@ -21,7 +21,6 @@ import play.api.mvc.MessagesControllerComponents
 import scala.concurrent.Future.successful
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import java.net.URLEncoder
-import java.nio.charset.Charset
 
 /** This takes the internal auth frontend redirect url of /test-only/sign-in?continue_url=... as
   * this is served without a host out on cloud environments and redirects it the the local host for

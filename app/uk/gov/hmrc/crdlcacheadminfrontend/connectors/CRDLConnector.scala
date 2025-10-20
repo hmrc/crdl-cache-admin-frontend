@@ -21,6 +21,7 @@ import org.apache.pekko.actor.ActorSystem
 import uk.gov.hmrc.crdlcacheadminfrontend.config.AppConfig
 import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.*
 import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.*
+import uk.gov.hmrc.crdlcacheadminfrontend.utils.HeaderUtils
 import uk.gov.hmrc.crdlcacheadminfrontend.utils.Logging
 import uk.gov.hmrc.http.*
 import uk.gov.hmrc.http.HttpReads.Implicits.*
@@ -49,7 +50,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
   ): Future[List[CodeListSnapshot]] = {
     // Use the internal-auth token to call the crdl-cache service
     val hcWithInternalAuth =
-      hc.copy(authorization = Some(Authorization((config.internalAuthToken))))
+      hc.copy(authorization = Some(Authorization(HeaderUtils.getAuthorization(hc))))
     logger.info(s"Fetching codelist snapshots from crdl-cache")
     val fetchResult = retryFor(s"fetch of codelist snapshots") {
       // No point in retrying if our request is wrong
@@ -88,7 +89,8 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     filterKeys: Option[Set[String]] = None,
     filterProperties: Option[Map[String, Any]] = None
   )(using hc: HeaderCarrier, ec: ExecutionContext): Future[List[CodeListEntry]] = {
-    val hcWithInternalAuth = hc.copy(authorization = Some(Authorization(config.internalAuthToken)))
+    val hcWithInternalAuth =
+      hc.copy(authorization = Some(Authorization(HeaderUtils.getAuthorization(hc))))
     logger.info(s"Fetching ${code} codelist from crdl-cache")
     val fetchResult = retryFor(s"fetch of codelist entries for ${code}") {
       case Upstream4xxResponse(_) => false
@@ -131,7 +133,8 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     roles: Option[Set[String]] = None,
     activeAt: Option[Instant] = None
   )(using hc: HeaderCarrier, ec: ExecutionContext): Future[List[CustomsOffice]] = {
-    val hcWithInternalAuth = hc.copy(authorization = Some(Authorization(config.internalAuthToken)))
+    val hcWithInternalAuth =
+      hc.copy(authorization = Some(Authorization(HeaderUtils.getAuthorization(hc))))
     logger.info(s"Fetching customs offices from crdl-cache")
     val fetchResult = retryFor(
       referenceNumbers.fold(s"fetching all customs offices")(r =>
