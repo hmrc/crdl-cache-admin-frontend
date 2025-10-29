@@ -21,7 +21,6 @@ import org.apache.pekko.actor.ActorSystem
 import uk.gov.hmrc.crdlcacheadminfrontend.config.AppConfig
 import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.*
 import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.*
-import uk.gov.hmrc.crdlcacheadminfrontend.utils.HeaderUtils
 import uk.gov.hmrc.crdlcacheadminfrontend.utils.Logging
 import uk.gov.hmrc.http.*
 import uk.gov.hmrc.http.HttpReads.Implicits.*
@@ -48,9 +47,6 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     hc: HeaderCarrier,
     ex: ExecutionContext
   ): Future[List[CodeListSnapshot]] = {
-    // Use the internal-auth token to call the crdl-cache service
-    val hcWithInternalAuth =
-      hc.copy(authorization = Some(Authorization(HeaderUtils.getAuthorization(hc))))
     logger.info(s"Fetching codelist snapshots from crdl-cache")
     val fetchResult = retryFor(s"fetch of codelist snapshots") {
       // No point in retrying if our request is wrong
@@ -59,7 +55,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-        .get(url"${config.crdlCacheUrl}/lists")(using hcWithInternalAuth)
+        .get(url"${config.crdlCacheUrl}/lists")(using hc)
         .execute[List[CodeListSnapshot]](using throwOnFailure(readEitherOf[List[CodeListSnapshot]]))
     }
     fetchResult.failed.foreach(err =>
@@ -89,15 +85,13 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     filterKeys: Option[Set[String]] = None,
     filterProperties: Option[Map[String, Any]] = None
   )(using hc: HeaderCarrier, ec: ExecutionContext): Future[List[CodeListEntry]] = {
-    val hcWithInternalAuth =
-      hc.copy(authorization = Some(Authorization(HeaderUtils.getAuthorization(hc))))
     logger.info(s"Fetching ${code} codelist from crdl-cache")
     val fetchResult = retryFor(s"fetch of codelist entries for ${code}") {
       case Upstream4xxResponse(_) => false
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-        .get(urlForCodeList(code, filterKeys, filterProperties))(using hcWithInternalAuth)
+        .get(urlForCodeList(code, filterKeys, filterProperties))(using hc)
         .execute[List[CodeListEntry]](using throwOnFailure(readEitherOf[List[CodeListEntry]]))
     }
     fetchResult.failed.foreach(err =>
@@ -133,8 +127,6 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     roles: Option[Set[String]] = None,
     activeAt: Option[Instant] = None
   )(using hc: HeaderCarrier, ec: ExecutionContext): Future[List[CustomsOffice]] = {
-    val hcWithInternalAuth =
-      hc.copy(authorization = Some(Authorization(HeaderUtils.getAuthorization(hc))))
     logger.info(s"Fetching customs offices from crdl-cache")
     val fetchResult = retryFor(
       referenceNumbers.fold(s"fetching all customs offices")(r =>
@@ -147,7 +139,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       httpClient
         .get(
           urlForCustomsOffices(referenceNumbers = referenceNumbers, countryCodes, roles, activeAt)
-        )(using hcWithInternalAuth)
+        )(using hc)
         .execute[List[CustomsOffice]](using throwOnFailure(readEitherOf[List[CustomsOffice]]))
     }
     fetchResult.failed.foreach(err =>
