@@ -26,6 +26,4 @@ class AppConfig @Inject() (val config: Configuration) extends ServicesConfig(con
     config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
 
   lazy val crdlCacheUrl: String = s"${baseUrl("crdl-cache")}/crdl-cache"
-
-  lazy val internalAuthToken: String = config.get[String]("internal-auth.token")
 }
