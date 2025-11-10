@@ -26,9 +26,11 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
 import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.CustomsOffice
+import uk.gov.hmrc.crdlcacheadminfrontend.config.AppConfig
 
 @Singleton
 class CustomsOfficesController @Inject (
+  config: AppConfig,
   auth: FrontendAuthComponents,
   crdlConnector: CRDLConnector,
   mcc: MessagesControllerComponents,
@@ -37,7 +39,7 @@ class CustomsOfficesController @Inject (
 )(using ExecutionContext)
   extends FrontendController(mcc)
   with I18nSupport {
-  def viewOffices =
+  def viewOffices(page: Option[Int], pageSize: Option[Int]) =
     auth
       .authorizedAction(
         continueUrl = routes.CustomsOfficesController.viewOffices(),
@@ -45,11 +47,9 @@ class CustomsOfficesController @Inject (
       )
       .async { implicit request =>
         crdlConnector
-          .fetchCustomsOffices()
-          .map(customsOffices =>
-            val sortedOffices = customsOffices
-              .sortWith((a, b) => a.referenceNumber.toLowerCase() < b.referenceNumber.toLowerCase())
-            Ok(officesPage(sortedOffices))
+          .fetchCustomsOfficeSummaries(page.getOrElse(1), pageSize.getOrElse(config.defaultPageSize))
+          .map(pagedOfficesResult =>
+            Ok(officesPage(pagedOfficesResult))
           )
       }
 

@@ -16,7 +16,8 @@
 
 @import uk.gov.hmrc.crdlcacheadminfrontend.views.html.Layout
 @import uk.gov.hmrc.crdlcacheadminfrontend.views.html.components._
-@import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.CustomsOffice
+@import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.CustomsOfficeSummary
+@import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
 @import uk.gov.hmrc.crdlcacheadminfrontend.utils.ViewUtils.*
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
@@ -24,34 +25,35 @@
     layout: Layout,
     govukTable: GovukTable,
     heading: Heading,
-    link: Link
+    link: Link,
+    pagedResults: PagedResults
 )
 
-@(customsOffices: List[CustomsOffice])(implicit request: RequestHeader, messages: Messages)
+@(customsOfficesPagedResult: PagedResult[CustomsOfficeSummary])(implicit request: RequestHeader, messages: Messages)
 
 @layout(pageTitle = Some(pageTitle(messages("customsOffices.viewOffices.pageTitle")))) {
     @heading(messages("customsOffices.viewOffices.pageTitle"))
-    @govukTable(Table(
-        head = Some(Seq(
-            HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.referenceNumber"))),
-            HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.countryCode"))),
-            HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.name"))),
-            HeadCell()
-        )),
-        rows = customsOffices.map(c => Seq(
-            TableRow(content = Text(c.referenceNumber)),
-            TableRow(content = Text(c.customsOfficeLsd.customsOfficeUsualName)),
-            TableRow(content = Text(c.countryCode)),
-            TableRow(content = HtmlContent(link(s"office-${c.referenceNumber}", messages("links.details"), officeDetailUrl(c.referenceNumber), Some(s"for customs office ${c.customsOfficeLsd.customsOfficeUsualName}"))))
+    
+    Search goes here
+
+    @pagedResults(
+        customsOfficesPagedResult,
+        govukTable(Table(
+            head = Some(Seq(
+                HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.referenceNumber"))),
+                HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.countryCode"))),
+                HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.name"))),
+                HeadCell()
+            )),
+            rows = customsOfficesPagedResult.items.map(c => Seq(
+                TableRow(content = Text(c.referenceNumber)),
+                TableRow(content = Text(c.countryCode)),
+                TableRow(content = Text(c.customsOfficeUsualName)),
+                TableRow(content = HtmlContent(link(s"office-${c.referenceNumber}", messages("links.details"), officeDetailUrl(c.referenceNumber), Some(s"for customs office ${c.customsOfficeUsualName}"))))
+            ))
         ))
-    ))
+    )
 }
-
-@{
-    //$COVERAGE-OFF$
-}
-
-
 
 @{
     //$COVERAGE-OFF$

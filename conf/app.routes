@@ -10,5 +10,5 @@ GET         /sign-in                uk.gov.hmrc.crdlcacheadminfrontend.auth.Auth
 GET         /lists                  uk.gov.hmrc.crdlcacheadminfrontend.codeLists.controllers.CodeListsController.viewLists()
 GET         /lists/:code            uk.gov.hmrc.crdlcacheadminfrontend.codeLists.controllers.CodeListsController.listDetail(code: String)
 
-GET         /offices                uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.controllers.CustomsOfficesController.viewOffices()
+GET         /offices                uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.controllers.CustomsOfficesController.viewOffices(page: Option[Int] ?= None, pageSize: Option[Int] ?= None)
 GET         /offices/:ref           uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.controllers.CustomsOfficesController.officeDetail(ref: String)
