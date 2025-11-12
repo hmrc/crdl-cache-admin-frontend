@@ -18,7 +18,7 @@ package uk.gov.hmrc.crdlcacheadminfrontend.dataTraits
 
 import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.CustomsOfficeSummary
 import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{Json, Format}
 
 case class CustomsOfficeSummaryOptionss()
 
@@ -44,7 +44,7 @@ trait CustomsOfficeSummaryTestData {
     totalPages = totalPages.getOrElse(1)
   )
 
-  def asJson[T](pagedResult: PagedResult[T])(implicit writesT: Writes[T]): String =
+  def asJson[T](pagedResult: PagedResult[T])(implicit formatT: Format[T]): String =
     Json.toJson(pagedResult).toString
 
   lazy val pagedCustomsOfficeSummaryResult: PagedResult[CustomsOfficeSummary] =

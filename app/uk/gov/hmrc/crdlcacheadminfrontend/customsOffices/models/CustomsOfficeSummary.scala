@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models
 
-import play.api.libs.json.{Json, Reads, Writes}
+import play.api.libs.json.{Json, Format}
 
 final case class CustomsOfficeSummary(
   referenceNumber: String,
@@ -25,6 +25,5 @@ final case class CustomsOfficeSummary(
 )
 
 object CustomsOfficeSummary {
-  given Reads[CustomsOfficeSummary] = Json.reads[CustomsOfficeSummary]
-  given Writes[CustomsOfficeSummary] = Json.writes[CustomsOfficeSummary]
+  given Format[CustomsOfficeSummary] = Json.format[CustomsOfficeSummary]
 }
