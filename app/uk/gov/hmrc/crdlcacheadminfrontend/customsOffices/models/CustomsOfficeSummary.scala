@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.crdlcacheadminfrontend.config
+package uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import play.api.libs.json.{Json, Format}
 
-@Singleton
-class AppConfig @Inject() (val config: Configuration) extends ServicesConfig(config) {
-  lazy val welshLanguageSupportEnabled: Boolean =
-    config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
+final case class CustomsOfficeSummary(
+  referenceNumber: String,
+  countryCode: String,
+  customsOfficeUsualName: String,
+)
 
-  lazy val crdlCacheUrl: String = s"${baseUrl("crdl-cache")}/crdl-cache"
-
-  lazy val defaultPageSize = config.getOptional[Int]("paging.defaultPageSize").getOrElse(10)
+object CustomsOfficeSummary {
+  given Format[CustomsOfficeSummary] = Json.format[CustomsOfficeSummary]
 }

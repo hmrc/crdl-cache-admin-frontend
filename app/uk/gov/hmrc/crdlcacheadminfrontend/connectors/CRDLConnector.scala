@@ -31,6 +31,7 @@ import java.net.URL
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import java.time.Instant
+import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
 
 @Singleton
 class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(using
@@ -42,6 +43,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
 
   private val crdlCacheCodeListsUrl      = s"${config.crdlCacheUrl}/lists"
   private val crdlCacheCustomsOfficesUrl = s"${config.crdlCacheUrl}/offices"
+  private val crdlCacheCustomsOfficesUrlV2 = s"${config.crdlCacheUrl}/v2/offices"
 
   def fetchCodeListSnapShots()(using
     hc: HeaderCarrier,
@@ -55,7 +57,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-        .get(url"${config.crdlCacheUrl}/lists")(using hc)
+        .get(url"${config.crdlCacheUrl}/lists")
         .execute[List[CodeListSnapshot]](using throwOnFailure(readEitherOf[List[CodeListSnapshot]]))
     }
     fetchResult.failed.foreach(err =>
@@ -91,11 +93,28 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-        .get(urlForCodeList(code, filterKeys, filterProperties))(using hc)
+        .get(urlForCodeList(code, filterKeys, filterProperties))
         .execute[List[CodeListEntry]](using throwOnFailure(readEitherOf[List[CodeListEntry]]))
     }
     fetchResult.failed.foreach(err =>
       logger.error(s"Retries exceeded while fetching ${code} ", err)
+    )
+    fetchResult
+  }
+
+  def fetchCustomsOfficeSummaries(pageNum: Int, pageSize: Int)
+    (using hc: HeaderCarrier, ec: ExecutionContext): Future[PagedResult[CustomsOfficeSummary]] = {
+    logger.info(s"Fetching customs office summaries from crdl-cache")
+    val fetchResult = retryFor("Fetching customs office summaries") {
+      case Upstream4xxResponse(_) => false
+      case Upstream5xxResponse(_) => true
+    } {
+      httpClient
+        .get(url"${crdlCacheCustomsOfficesUrlV2}/summaries?pageNum=$pageNum&pageSize=$pageSize")
+        .execute[PagedResult[CustomsOfficeSummary]](using throwOnFailure(readEitherOf[PagedResult[CustomsOfficeSummary]]))
+    }
+    fetchResult.failed.foreach(err =>
+      logger.error(s"Retries exceeded while fetching customs office summaries", err)
     )
     fetchResult
   }
@@ -139,7 +158,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       httpClient
         .get(
           urlForCustomsOffices(referenceNumbers = referenceNumbers, countryCodes, roles, activeAt)
-        )(using hc)
+        )
         .execute[List[CustomsOffice]](using throwOnFailure(readEitherOf[List[CustomsOffice]]))
     }
     fetchResult.failed.foreach(err =>

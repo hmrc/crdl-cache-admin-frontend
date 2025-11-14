@@ -43,7 +43,7 @@ codeLists.listDetail.table.headings.properties = Properties
 ########## Customs Offices
 customsOffices.viewOffices.pageTitle = Customs Offices
 customsOffices.viewOffices.table.headings.referenceNumber = Reference Number
-customsOffices.viewOffices.table.headings.countryCode = Reference Number
+customsOffices.viewOffices.table.headings.countryCode = Country Code
 customsOffices.viewOffices.table.headings.name = Office Name
 
 

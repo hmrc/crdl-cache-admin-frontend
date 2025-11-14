@@ -27,7 +27,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.MimeTypes
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.*
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.crdlcacheadminfrontend.auth.Permissions
 import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.CodeListSnapshot

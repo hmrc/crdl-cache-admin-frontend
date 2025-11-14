@@ -1,0 +1,76 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
+@import uk.gov.hmrc.crdlcacheadminfrontend.config.AppConfig
+
+@this(
+    govukPagination: GovukPagination,
+    paragraph: Paragraph
+)
+
+@(
+    pagedResult: PagedResult[_],
+    renderResults: => play.twirl.api.HtmlFormat.Appendable,
+    pagesFromCurrent: Int = 2
+)(implicit messages: Messages)
+
+@if(pagedResult.items.length > 0) {
+    @renderResults
+
+    @{
+        val currentPage = pagedResult.pageNum
+        val totalPages = pagedResult.totalPages
+        val firstPageInBlock = currentPage - pagesFromCurrent
+        val lastPageInBlock = currentPage + pagesFromCurrent
+        val ellipsisPageItem = PaginationItem(ellipsis = Some(true))
+        val pageItems = (1 to pagedResult.totalPages).foldLeft[Seq[PaginationItem]](Nil) {
+            (acc, page) =>
+                if(page >= firstPageInBlock && page <= lastPageInBlock) {
+                    acc :+ PaginationItem(number = Some(page.toString), href = s"?page=${page}&pageSize=${pagedResult.pageSize}", current = Some(page == currentPage))
+                } else {
+                    if(page == 1) {
+                        val firstPageItem = PaginationItem(number = Some("1"), href = s"?page=1&pageSize=${pagedResult.pageSize}")
+                        if(page != firstPageInBlock - 1) {
+                            acc :++ Seq(firstPageItem, ellipsisPageItem)
+                        } else {
+                            acc :+ firstPageItem
+                        }
+                    } else if(page == totalPages) {
+                        val lastPageItem = PaginationItem(number = Some(totalPages.toString), href = s"?page={totalPages}&pageSize=${pagedResult.pageSize}")
+                        if(page != lastPageInBlock + 1) {
+                            acc :++ Seq(ellipsisPageItem, lastPageItem)
+                        } else {
+                            acc :+ lastPageItem
+                        }
+                    } else {
+                        acc
+                    }
+                }
+        }
+        govukPagination(Pagination(
+            items = Some(pageItems),
+            previous = if(pagedResult.pageNum > 1) Some(PaginationLink(href = s"?page=${pagedResult.pageNum - 1}&pageSize=${pagedResult.pageSize}")) else None,
+            next = if(pagedResult.pageNum < pagedResult.totalPages) Some(PaginationLink(href = s"?page=${pagedResult.pageNum + 1}&pageSize=${pagedResult.pageSize}")) else None
+        ))
+    }
+} else {
+    @paragraph("No results found")
+}
+
+
+
