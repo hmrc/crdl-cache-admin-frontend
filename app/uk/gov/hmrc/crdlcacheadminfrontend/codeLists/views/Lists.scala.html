@@ -36,12 +36,16 @@
             HeadCell(content = Text(messages("codeLists.viewLists.table.headings.code"))),
             HeadCell(content = Text(messages("codeLists.viewLists.table.headings.snapshot"))),
             HeadCell(content = Text(messages("codeLists.viewLists.table.headings.updated"))),
+            HeadCell(content = Text(messages("codeLists.viewLists.table.headings.domain"))),
+            HeadCell(content = Text(messages("codeLists.viewLists.table.headings.phase"))),
             HeadCell()
         )),
         rows = snapshots.map(s => Seq(
             TableRow(content = Text(s.codeListCode)),
             TableRow(content = Text(s.snapshotVersion.toString())),
             TableRow(content = Text(formatDateWithTime(s.lastUpdated))),
+            TableRow(content = Text(s.domain.getOrElse("-"))),
+            TableRow(content = Text(s.phase.getOrElse("-"))),
             TableRow(content = HtmlContent(link(s"details-${s.codeListCode}", messages("links.details"), listDetailUrl(s.codeListCode), Some(s"for code list ${s.codeListCode}"))))
         ))
     ))
