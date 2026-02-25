@@ -52,13 +52,14 @@ class CustomsOfficesControllerSpec
   with BeforeAndAfterEach
   with CustomsOfficeSummaryTestData
   with CustomsOfficeTestData {
-  private val defaultPageNum = 1
-  private val defaultPageSize = 10
-  private val defaultReferenceNumber = "TestRef"
+  private val defaultPageNum            = 1
+  private val defaultPageSize           = 10
+  private val defaultReferenceNumber    = "TestRef"
   private val defaultReferenceNumberSet = Some(Set(defaultReferenceNumber))
-  private val defaultAuthToken = UUID.randomUUID().toString
-  private val defaultRequest = FakeRequest().withSession("authToken" -> defaultAuthToken)
-  private val expectedOfficesRedirectUrl = "/internal-auth-frontend/sign-in?continue_url=%2Fcrdl-cache-admin-frontend%2F"
+  private val defaultAuthToken          = UUID.randomUUID().toString
+  private val defaultRequest            = FakeRequest().withSession("authToken" -> defaultAuthToken)
+  private val expectedOfficesRedirectUrl =
+    "/internal-auth-frontend/sign-in?continue_url=%2Fcrdl-cache-admin-frontend%2F"
 
   given ec: ExecutionContext              = ExecutionContext.global
   given mcc: MessagesControllerComponents = stubMessagesControllerComponents()
@@ -81,7 +82,7 @@ class CustomsOfficesControllerSpec
   // Auth Stub behaviour
   def stubAuth_Successful() =
     when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
-    .thenReturn(Future.unit)
+      .thenReturn(Future.unit)
 
   def stubAuth_ThrowsUpstreamErrorResponse(responseErrorCode: Int = INTERNAL_SERVER_ERROR) =
     when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
@@ -89,34 +90,62 @@ class CustomsOfficesControllerSpec
 
   // CRDLConnector Stub Behaviour...
   // ...fetchCustomsOfficeSummaries
-  def stubCRDLConnector_FetchCustomsOfficeSummaries_Successful (
+  def stubCRDLConnector_FetchCustomsOfficeSummaries_Successful(
     payload: PagedResult[CustomsOfficeSummary] = pagedCustomsOfficeSummaryResult,
     pageNum: Int = defaultPageNum,
     pageSize: Int = defaultPageSize
   ) =
-    when(crdlConnectorMock.fetchCustomsOfficeSummaries(eqTo(pageNum), eqTo(pageSize))(using any(), eqTo(ec)))
+    when(
+      crdlConnectorMock.fetchCustomsOfficeSummaries(eqTo(pageNum), eqTo(pageSize))(using
+        any(),
+        eqTo(ec)
+      )
+    )
       .thenReturn(Future.successful(payload))
 
-  def stubCRDLConnector_FetchCustomsOfficeSummaries_ThrowsUpsteamErrorResponse (
+  def stubCRDLConnector_FetchCustomsOfficeSummaries_ThrowsUpsteamErrorResponse(
     pageNum: Int = defaultPageNum,
     pageSize: Int = defaultPageSize
   ) =
-    when(crdlConnectorMock.fetchCustomsOfficeSummaries(eqTo(pageNum), eqTo(pageSize))(using any(), eqTo(ec)))
-      .thenReturn(Future.failed(UpstreamErrorResponse("Customs office summaries called failed", INTERNAL_SERVER_ERROR)))
+    when(
+      crdlConnectorMock.fetchCustomsOfficeSummaries(eqTo(pageNum), eqTo(pageSize))(using
+        any(),
+        eqTo(ec)
+      )
+    )
+      .thenReturn(
+        Future.failed(
+          UpstreamErrorResponse("Customs office summaries called failed", INTERNAL_SERVER_ERROR)
+        )
+      )
 
   // ...fetchCustomsOffices
   def stubCRDLConnector_FetchCustomsOffices_Successful(
     payload: List[CustomsOffice] = defaultCustomsOfficeList,
     referenceNumbers: Option[Set[String]] = defaultReferenceNumberSet
   ) =
-    when(crdlConnectorMock.fetchCustomsOffices(eqTo(referenceNumbers), any(), any(), any())(using any(), eqTo(ec)))
+    when(
+      crdlConnectorMock.fetchCustomsOffices(eqTo(referenceNumbers), any(), any(), any())(using
+        any(),
+        eqTo(ec)
+      )
+    )
       .thenReturn(Future.successful(payload))
 
-  def stubCRDLConnector_FetchCustomsOffices_ThrowsUpsteamErrorResponse (
+  def stubCRDLConnector_FetchCustomsOffices_ThrowsUpsteamErrorResponse(
     referenceNumbers: Option[Set[String]] = defaultReferenceNumberSet
   ) =
-    when(crdlConnectorMock.fetchCustomsOffices(eqTo(referenceNumbers), any(), any(), any())(using any(), eqTo(ec)))
-      .thenReturn(Future.failed(UpstreamErrorResponse("Customs office summaries called failed", INTERNAL_SERVER_ERROR)))
+    when(
+      crdlConnectorMock.fetchCustomsOffices(eqTo(referenceNumbers), any(), any(), any())(using
+        any(),
+        eqTo(ec)
+      )
+    )
+      .thenReturn(
+        Future.failed(
+          UpstreamErrorResponse("Customs office summaries called failed", INTERNAL_SERVER_ERROR)
+        )
+      )
 
   // Pages stubs behaviour
   def stubOfficesPage_Successful() =
@@ -130,7 +159,7 @@ class CustomsOfficesControllerSpec
     super.beforeEach()
     reset(configMock, authStub, crdlConnectorMock, officesPageMock, officeDetailsPageMock)
   }
-  
+
   "CustomsOfficesController.viewOffices" should "return 200 OK when there are no errors" in {
     stubAuth_Successful()
     stubCRDLConnector_FetchCustomsOfficeSummaries_Successful()

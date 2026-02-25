@@ -77,12 +77,13 @@ class CodeListsControllerSpec
 
   val timestamp = Instant.now()
 
-  val BC36  = CodeListSnapshot("BC36", 21, Some(timestamp))
-  val BC108 = CodeListSnapshot("BC108", 7, Some(timestamp))
-  val BC08  = CodeListSnapshot("BC08", 17, Some(timestamp))
-  val BC66  = CodeListSnapshot("BC66", 10, Some(timestamp))
+  val BC36  = CodeListSnapshot("BC36", 21, None, None, Some(timestamp))
+  val BC108 = CodeListSnapshot("BC108", 7, None, None, Some(timestamp))
+  val BC08  = CodeListSnapshot("BC08", 17, None, None, Some(timestamp))
+  val BC66  = CodeListSnapshot("BC66", 10, None, None, Some(timestamp))
+  val CL190 = CodeListSnapshot("CL190", 2, Some("P6"), Some("NCTS"), Some(timestamp))
 
-  val codeListSnapshots = List(BC36, BC108, BC08, BC66)
+  val codeListSnapshots = List(BC36, BC108, BC08, BC66, CL190)
 
   "CodeListsController.viewLists" should "return 200 OK when there are no errors" in {
     when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
@@ -92,7 +93,7 @@ class CodeListsControllerSpec
       .thenReturn(Future.successful(codeListSnapshots))
 
     // TODO: Decide what to do about lexical ordering as it will sort 1xx codes awkwardly
-    val orderedSnapshots = List(BC08, BC108, BC36, BC66)
+    val orderedSnapshots = List(BC08, BC108, BC36, BC66, CL190)
 
     when(listsPage(eqTo(orderedSnapshots))(using any(), any())).thenReturn(HtmlFormat.empty)
 
