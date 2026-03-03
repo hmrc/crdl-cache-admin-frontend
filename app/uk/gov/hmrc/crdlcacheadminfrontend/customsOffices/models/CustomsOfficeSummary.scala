@@ -22,6 +22,8 @@ final case class CustomsOfficeSummary(
   referenceNumber: String,
   countryCode: String,
   customsOfficeUsualName: String,
+  phase: Option[String],
+  domain: Option[String]
 )
 
 object CustomsOfficeSummary {

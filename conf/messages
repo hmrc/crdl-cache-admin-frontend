@@ -44,6 +44,8 @@ codeLists.listDetail.table.headings.properties = Properties
 customsOffices.viewOffices.pageTitle = Customs Offices
 customsOffices.viewOffices.table.headings.referenceNumber = Reference Number
 customsOffices.viewOffices.table.headings.countryCode = Country Code
+customsOffices.viewOffices.table.headings.domain = Domain
+customsOffices.viewOffices.table.headings.phase = Phase
 customsOffices.viewOffices.table.headings.name = Office Name
 
 
