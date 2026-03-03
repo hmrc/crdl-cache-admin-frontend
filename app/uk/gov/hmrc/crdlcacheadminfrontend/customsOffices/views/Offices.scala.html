@@ -53,7 +53,7 @@
                 TableRow(content = Text(optionOrDefault(c.phase))),
                 TableRow(content = Text(optionOrDefault(c.domain))),
                 TableRow(content = Text(c.customsOfficeUsualName)),
-                TableRow(content = HtmlContent(link(s"office-${c.referenceNumber}", messages("links.details"), officeDetailUrl(c.referenceNumber, c.phase, c.domain), Some(s"for customs office ${c.customsOfficeUsualName}"))))
+                TableRow(content = HtmlContent(link(s"office-${c.referenceNumber}", messages("links.details"), officeDetailUrl(c.referenceNumber), Some(s"for customs office ${c.customsOfficeUsualName}"))))
             ))
         ))
     )

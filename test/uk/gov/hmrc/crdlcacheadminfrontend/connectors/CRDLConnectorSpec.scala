@@ -138,9 +138,9 @@ class CRDLConnectorSpec
   }
 
   def fetchCodeListSnapShotsTestRetry(
-    errorResponse: () => ResponseDefinitionBuilder,
-    shouldRetry: Boolean
-  ) = {
+                                       errorResponse: () => ResponseDefinitionBuilder,
+                                       shouldRetry: Boolean
+                                     ) = {
     stubFor(
       get(urlEqualTo(s"$codeListSnapShotsUrl?pageNum=1&pageSize=10"))
         .inScenario(retryScenario)
