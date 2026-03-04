@@ -202,4 +202,20 @@ class CRDLConnectorSpec
   it should "should Retry when a server error is returned from the API" in {
     customsOfficeSummariesTestRetry(serverError, true)
   }
+
+  it should "throw UpstreamErrorResponse when a client error is returned for fetchCodeListSnapShots" in {
+    fetchCodeListSnapShotsError(badRequest)
+  }
+
+  it should "throw UpstreamErrorResponse when a server error is returned for fetchCodeListSnapShots" in {
+    fetchCodeListSnapShotsError(serverError)
+  }
+
+  it should "should not Retry when a client error is returned for fetchCodeListSnapShots" in {
+    fetchCodeListSnapShotsTestRetry(badRequest, false)
+  }
+
+  it should "should Retry when a server error is returned from for fetchCodeListSnapShots" in {
+    fetchCodeListSnapShotsTestRetry(serverError, true)
+  }
 }
