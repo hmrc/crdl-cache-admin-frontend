@@ -21,10 +21,10 @@ import java.time.Instant
 import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.CustomsOfficeDetail
 
 trait CustomsOfficeTestData {
-  /* 
+  /*
    * Produces a minimul viable Customs Office object for testing.
    * If conditional logic is required for variations please feel free
-   * to add paramters and expand 
+   * to add paramters and expand
    */
   def generateCustomsOffice(key: String) = CustomsOffice(
     referenceNumber = s"$key-ReferenceNumber",
@@ -63,8 +63,9 @@ trait CustomsOfficeTestData {
     customsOfficeTimetable = List()
   )
 
-  def generateCustomsOfficeList(numberOfEntries: Int): List[CustomsOffice] = (1 to numberOfEntries).map(key => generateCustomsOffice(key.toString)).toList
+  def generateCustomsOfficeList(numberOfEntries: Int): List[CustomsOffice] =
+    (1 to numberOfEntries).map(key => generateCustomsOffice(key.toString)).toList
 
-  lazy val defaultCustomsOffice: CustomsOffice = generateCustomsOffice("Default")
+  lazy val defaultCustomsOffice: CustomsOffice           = generateCustomsOffice("Default")
   lazy val defaultCustomsOfficeList: List[CustomsOffice] = generateCustomsOfficeList(3)
 }
