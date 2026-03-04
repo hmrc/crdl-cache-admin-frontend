@@ -103,10 +103,8 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     fetchResult
   }
 
-  def fetchCustomsOfficeSummaries(pageNum: Int, pageSize: Int)(using
-    hc: HeaderCarrier,
-    ec: ExecutionContext
-  ): Future[PagedResult[CustomsOfficeSummary]] = {
+  def fetchCustomsOfficeSummaries(pageNum: Int, pageSize: Int)
+    (using hc: HeaderCarrier, ec: ExecutionContext): Future[PagedResult[CustomsOfficeSummary]] = {
     logger.info(s"Fetching customs office summaries from crdl-cache")
     val fetchResult = retryFor("Fetching customs office summaries") {
       case Upstream4xxResponse(_) => false
@@ -114,9 +112,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     } {
       httpClient
         .get(url"${crdlCacheCustomsOfficesUrlV2}/summaries?pageNum=$pageNum&pageSize=$pageSize")
-        .execute[PagedResult[CustomsOfficeSummary]](using
-          throwOnFailure(readEitherOf[PagedResult[CustomsOfficeSummary]])
-        )
+        .execute[PagedResult[CustomsOfficeSummary]](using throwOnFailure(readEitherOf[PagedResult[CustomsOfficeSummary]]))
     }
     fetchResult.failed.foreach(err =>
       logger.error(s"Retries exceeded while fetching customs office summaries", err)

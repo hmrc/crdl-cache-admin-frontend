@@ -34,6 +34,8 @@ import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.CodeListSnapshot
 import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.views.html.{ListDetail, Lists}
 import uk.gov.hmrc.crdlcacheadminfrontend.connectors.CRDLConnector
 import uk.gov.hmrc.crdlcacheadminfrontend.views.html.NotFound
+import uk.gov.hmrc.crdlcacheadminfrontend.config.AppConfig
+import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.internalauth.client.Retrieval
 import uk.gov.hmrc.internalauth.client.Retrieval.EmptyRetrieval
@@ -55,13 +57,21 @@ class CodeListsControllerSpec
 
   private val authToken = UUID.randomUUID().toString
 
+  private val configMock      = mock[AppConfig]
   private val authStub        = mock[StubBehaviour]
   private val crdlConnector   = mock[CRDLConnector]
   private val notFoundPage    = mock[NotFound]
   private val listsPage       = mock[Lists]
   private val listDetailsPage = mock[ListDetail]
 
+  private val defaultPageNum     = 1
+  private val defaultPageSize    = 10
+  private val defaultItemsInPage = 10
+  private val defaultTotalItems  = 10
+  private val defaultTotalPages  = 1
+
   val controller = new CodeListsController(
+    configMock,
     FrontendAuthComponentsStub(authStub),
     crdlConnector,
     mcc,
