@@ -47,10 +47,11 @@ class CustomsOfficesController @Inject (
       )
       .async { implicit request =>
         crdlConnector
-          .fetchCustomsOfficeSummaries(page.getOrElse(1), pageSize.getOrElse(config.defaultPageSize))
-          .map(pagedOfficesResult =>
-            Ok(officesPage(pagedOfficesResult))
+          .fetchCustomsOfficeSummaries(
+            page.getOrElse(1),
+            pageSize.getOrElse(config.defaultPageSize)
           )
+          .map(pagedOfficesResult => Ok(officesPage(pagedOfficesResult)))
       }
 
   def officeDetail(referenceNumber: String) =
