@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.crdlcacheadminfrontend.views.html.Layout
 @import uk.gov.hmrc.crdlcacheadminfrontend.views.html.components._
 @import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.CodeListSnapshot
+@import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
 @import uk.gov.hmrc.crdlcacheadminfrontend.utils.ViewUtils.*
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
@@ -24,27 +25,32 @@
     layout: Layout,
     govukTable: GovukTable,
     heading: Heading,
-    link: Link
+    link: Link,
+    pagedResults: PagedResults
 )
 
-@(snapshots: List[CodeListSnapshot])(implicit request: RequestHeader, messages: Messages)
+@(snapshotsPageResult: PagedResult[CodeListSnapshot])(implicit request: RequestHeader, messages: Messages)
 
 @layout(pageTitle = Some(pageTitle(messages("codeLists.viewLists.pageTitle")))) {
     @heading(messages("codeLists.viewLists.pageTitle"))
-    @govukTable(Table(
-        head = Some(Seq(
-            HeadCell(content = Text(messages("codeLists.viewLists.table.headings.code"))),
-            HeadCell(content = Text(messages("codeLists.viewLists.table.headings.snapshot"))),
-            HeadCell(content = Text(messages("codeLists.viewLists.table.headings.updated"))),
-            HeadCell()
-        )),
-        rows = snapshots.map(s => Seq(
-            TableRow(content = Text(s.codeListCode)),
-            TableRow(content = Text(s.snapshotVersion.toString())),
-            TableRow(content = Text(formatDateWithTime(s.lastUpdated))),
-            TableRow(content = HtmlContent(link(s"details-${s.codeListCode}", messages("links.details"), listDetailUrl(s.codeListCode), Some(s"for code list ${s.codeListCode}"))))
+
+    @pagedResults(
+      snapshotsPageResult,
+        govukTable(Table(
+            head = Some(Seq(
+                HeadCell(content = Text(messages("codeLists.viewLists.table.headings.code"))),
+                HeadCell(content = Text(messages("codeLists.viewLists.table.headings.snapshot"))),
+                HeadCell(content = Text(messages("codeLists.viewLists.table.headings.updated"))),
+                HeadCell()
+            )),
+            rows = snapshotsPageResult.items.map(s => Seq(
+                TableRow(content = Text(s.codeListCode)),
+                TableRow(content = Text(s.snapshotVersion.toString())),
+                TableRow(content = Text(formatDateWithTime(s.lastUpdated))),
+                TableRow(content = HtmlContent(link(s"details-${s.codeListCode}", messages("links.details"), listDetailUrl(s.codeListCode), Some(s"for code list ${s.codeListCode}"))))
+            ))
         ))
-    ))
+      )
 }
 
 @{
