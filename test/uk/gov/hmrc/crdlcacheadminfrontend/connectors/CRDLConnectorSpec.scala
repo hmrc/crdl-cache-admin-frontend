@@ -28,7 +28,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.stubbing.Scenario
-import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.{CustomsOfficeSummaryTestData, CodeListSnapShotsTestData}
+import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.{
+  CustomsOfficeSummaryTestData,
+  CodeListSnapShotsTestData
+}
 
 class CRDLConnectorSpec
   extends AsyncFlatSpec
@@ -40,8 +43,8 @@ class CRDLConnectorSpec
   given actorSystem: ActorSystem = ActorSystem("test")
   given HeaderCarrier            = HeaderCarrier()
 
-  private val officeSumamriesUrl = "/crdl-cache/v2/offices/summaries"
-  private val codeListSnapShotsUrl   = "/crdl-cache/v2/lists"
+  private val officeSumamriesUrl   = "/crdl-cache/v2/offices/summaries"
+  private val codeListSnapShotsUrl = "/crdl-cache/v2/lists"
 
   private val appConfig = new AppConfig(
     Configuration(
@@ -117,9 +120,9 @@ class CRDLConnectorSpec
   }
 
   def fetchCodeListSnapShotsTestRetry(
-                                       errorResponse: () => ResponseDefinitionBuilder,
-                                       shouldRetry: Boolean
-                                     ) = {
+    errorResponse: () => ResponseDefinitionBuilder,
+    shouldRetry: Boolean
+  ) = {
     stubFor(
       get(urlEqualTo(s"$codeListSnapShotsUrl?pageNum=1&pageSize=10"))
         .inScenario(retryScenario)
@@ -167,8 +170,8 @@ class CRDLConnectorSpec
 
   "CRDLConnector.fetchCodeListSnapShots: return the data as delivered from the API" should "return the data as delivered from the API" in {
     val expectedResult = pagedCodeListSnapShotResult
-    val pageNum = 1
-    val pageSize = pagedCodeListSnapShotResult.items.length
+    val pageNum        = 1
+    val pageSize       = pagedCodeListSnapShotResult.items.length
 
     stubFor(
       get(urlPathEqualTo(codeListSnapShotsUrl))

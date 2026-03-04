@@ -24,21 +24,23 @@ case class CodeListSnapShotsOptions()
 
 trait CodeListSnapShotsTestData extends PagedResultTestData {
   def generateCodeList(key: String, version: Int) = CodeListSnapshot(
-        codeListCode = s"CL$key",
-        snapshotVersion = version,
-        lastUpdated = Some(Instant.now())
+    codeListCode = s"CL$key",
+    snapshotVersion = version,
+    phase = Some("P6"),
+    domain = Some("NCTS"),
+    lastUpdated = Some(Instant.now())
   )
 
   lazy val pagedCodeListSnapShotResult: PagedResult[CodeListSnapshot] =
-      pagedResult(
-        Seq(
-          generateCodeList("001", 1),
-          generateCodeList("002", 2),
-          generateCodeList("003", 3),
-          generateCodeList("004", 4),
-          generateCodeList("005", 5),
-        ),
-        totalItems = Some(15),
-        totalPages = Some(3)
-      )
+    pagedResult(
+      Seq(
+        generateCodeList("001", 1),
+        generateCodeList("002", 2),
+        generateCodeList("003", 3),
+        generateCodeList("004", 4),
+        generateCodeList("005", 5)
+      ),
+      totalItems = Some(15),
+      totalPages = Some(3)
+    )
 }

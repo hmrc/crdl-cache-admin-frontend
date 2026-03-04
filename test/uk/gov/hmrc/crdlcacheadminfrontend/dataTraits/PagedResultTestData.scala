@@ -21,13 +21,13 @@ import play.api.libs.json.{Json, Format}
 
 trait PagedResultTestData {
   def pagedResult[T](
-                      items: Seq[T],
-                      pageNum: Option[Int] = None,
-                      pageSize: Option[Int] = None,
-                      itemsInPage: Option[Int] = None,
-                      totalItems: Option[Int] = None,
-                      totalPages: Option[Int] = None
-                    ): PagedResult[T] = PagedResult(
+    items: Seq[T],
+    pageNum: Option[Int] = None,
+    pageSize: Option[Int] = None,
+    itemsInPage: Option[Int] = None,
+    totalItems: Option[Int] = None,
+    totalPages: Option[Int] = None
+  ): PagedResult[T] = PagedResult(
     items = items,
     pageNum = pageNum.getOrElse(1),
     pageSize = pageSize.getOrElse(items.length),
