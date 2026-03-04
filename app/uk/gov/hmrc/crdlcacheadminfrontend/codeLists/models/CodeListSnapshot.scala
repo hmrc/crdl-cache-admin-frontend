@@ -22,6 +22,8 @@ import play.api.libs.json.*
 case class CodeListSnapshot(
   codeListCode: String,
   snapshotVersion: Int,
+  phase: Option[String],
+  domain: Option[String],
   lastUpdated: Option[Instant]
 )
 

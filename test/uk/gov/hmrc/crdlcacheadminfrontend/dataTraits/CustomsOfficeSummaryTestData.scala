@@ -23,21 +23,21 @@ case class CustomsOfficeSummaryOptions()
 
 trait CustomsOfficeSummaryTestData extends PagedResultTestData {
   def generateCustomOfficeSummary(key: String) = CustomsOfficeSummary(
-        referenceNumber = s"$key-ReferenceNumber",
-        countryCode = "CC",
-        customsOfficeUsualName = s"$key Customs Office"
+    referenceNumber = s"$key-ReferenceNumber",
+    countryCode = "CC",
+    customsOfficeUsualName = s"$key Customs Office"
   )
 
   lazy val pagedCustomsOfficeSummaryResult: PagedResult[CustomsOfficeSummary] =
-      pagedResult(
-        Seq(
-          generateCustomOfficeSummary("01"),
-          generateCustomOfficeSummary("02"),
-          generateCustomOfficeSummary("03"),
-          generateCustomOfficeSummary("04"),
-          generateCustomOfficeSummary("05"),
-        ),
-        totalItems = Some(15),
-        totalPages = Some(3)
-      )
+    pagedResult(
+      Seq(
+        generateCustomOfficeSummary("01"),
+        generateCustomOfficeSummary("02"),
+        generateCustomOfficeSummary("03"),
+        generateCustomOfficeSummary("04"),
+        generateCustomOfficeSummary("05")
+      ),
+      totalItems = Some(15),
+      totalPages = Some(3)
+    )
 }
