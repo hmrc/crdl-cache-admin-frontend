@@ -35,12 +35,12 @@ package uk.gov.hmrc.crdlcacheadminfrontend.models.paging
 import play.api.libs.json.{Json, Format}
 
 final case class PagedResult[T](
-    items: Seq[T],
-    pageNum: Int,
-    pageSize: Int,
-    itemsInPage: Int,
-    totalItems: Int,
-    totalPages: Int
+  items: Seq[T],
+  pageNum: Int,
+  pageSize: Int,
+  itemsInPage: Int,
+  totalItems: Int,
+  totalPages: Int
 )
 
 object PagedResult {

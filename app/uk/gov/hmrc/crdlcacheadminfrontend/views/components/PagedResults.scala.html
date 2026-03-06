@@ -26,13 +26,16 @@
 @(
     pagedResult: PagedResult[_],
     renderResults: => play.twirl.api.HtmlFormat.Appendable,
-    pagesFromCurrent: Int = 2
+    pagesFromCurrent: Int = 2,
+    additionalParams: Seq[(String, String)] = Seq.empty
 )(implicit messages: Messages)
 
 @if(pagedResult.items.length > 0) {
     @renderResults
 
     @{
+        val extraParamSuffix = if (additionalParams.isEmpty) "" else "&" + additionalParams.map { case (k, v) => s"$k=${java.net.URLEncoder.encode(v, "UTF-8")}" }.mkString("&")
+        def pageUrl(page: Int) = s"?page=${page}&pageSize=${pagedResult.pageSize}${extraParamSuffix}"
         val currentPage = pagedResult.pageNum
         val totalPages = pagedResult.totalPages
         val firstPageInBlock = currentPage - pagesFromCurrent
@@ -41,17 +44,17 @@
         val pageItems = (1 to pagedResult.totalPages).foldLeft[Seq[PaginationItem]](Nil) {
             (acc, page) =>
                 if(page >= firstPageInBlock && page <= lastPageInBlock) {
-                    acc :+ PaginationItem(number = Some(page.toString), href = s"?page=${page}&pageSize=${pagedResult.pageSize}", current = Some(page == currentPage))
+                    acc :+ PaginationItem(number = Some(page.toString), href = pageUrl(page), current = Some(page == currentPage))
                 } else {
                     if(page == 1) {
-                        val firstPageItem = PaginationItem(number = Some("1"), href = s"?page=1&pageSize=${pagedResult.pageSize}")
+                        val firstPageItem = PaginationItem(number = Some("1"), href = pageUrl(1))
                         if(page != firstPageInBlock - 1) {
                             acc :++ Seq(firstPageItem, ellipsisPageItem)
                         } else {
                             acc :+ firstPageItem
                         }
                     } else if(page == totalPages) {
-                        val lastPageItem = PaginationItem(number = Some(totalPages.toString), href = s"?page={totalPages}&pageSize=${pagedResult.pageSize}")
+                        val lastPageItem = PaginationItem(number = Some(totalPages.toString), href = pageUrl(totalPages))
                         if(page != lastPageInBlock + 1) {
                             acc :++ Seq(ellipsisPageItem, lastPageItem)
                         } else {
@@ -64,8 +67,8 @@
         }
         govukPagination(Pagination(
             items = Some(pageItems),
-            previous = if(pagedResult.pageNum > 1) Some(PaginationLink(href = s"?page=${pagedResult.pageNum - 1}&pageSize=${pagedResult.pageSize}")) else None,
-            next = if(pagedResult.pageNum < pagedResult.totalPages) Some(PaginationLink(href = s"?page=${pagedResult.pageNum + 1}&pageSize=${pagedResult.pageSize}")) else None
+            previous = if(pagedResult.pageNum > 1) Some(PaginationLink(href = pageUrl(pagedResult.pageNum - 1))) else None,
+            next = if(pagedResult.pageNum < pagedResult.totalPages) Some(PaginationLink(href = pageUrl(pagedResult.pageNum + 1))) else None
         ))
     }
 } else {

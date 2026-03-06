@@ -21,7 +21,7 @@ import play.api.libs.json.{Json, Format}
 final case class CustomsOfficeSummary(
   referenceNumber: String,
   countryCode: String,
-  customsOfficeUsualName: String,
+  customsOfficeUsualName: String
 )
 
 object CustomsOfficeSummary {
