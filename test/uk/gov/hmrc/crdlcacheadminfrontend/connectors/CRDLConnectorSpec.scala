@@ -46,10 +46,10 @@ class CRDLConnectorSpec
   given actorSystem: ActorSystem = ActorSystem("test")
   given HeaderCarrier            = HeaderCarrier()
 
-  private val officeSumamriesUrl   = "/crdl-cache/v2/offices/summaries"
-  private val officesDetailUrl     = "/crdl-cache/offices"
-  private val codeListSnapShotsUrl = "/crdl-cache/v2/lists"
-  val defaultReferenceNumber       = "Default-1234"
+  private val officeSumamriesUrl     = "/crdl-cache/v2/offices/summaries"
+  private val officesDetailUrl       = "/crdl-cache/offices"
+  private val codeListSnapShotsUrl   = "/crdl-cache/v2/lists"
+  private val defaultReferenceNumber = "Default-1234"
 
   private val appConfig = new AppConfig(
     Configuration(
