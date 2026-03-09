@@ -54,7 +54,7 @@ class CustomsOfficesController @Inject (
           .map(pagedOfficesResult => Ok(officesPage(pagedOfficesResult)))
       }
 
-  def officeDetail(referenceNumber: String) =
+  def officeDetail(referenceNumber: String, phase: Option[String], domain: Option[String]) =
     auth
       .authorizedAction(
         continueUrl = routes.CustomsOfficesController.viewOffices(),
@@ -62,7 +62,14 @@ class CustomsOfficesController @Inject (
       )
       .async { implicit request =>
         crdlConnector
-          .fetchCustomsOffices(referenceNumbers = Some(Set(referenceNumber)))
+          .fetchCustomsOffices(
+            Some(Set(referenceNumber)),
+            countryCodes = None,
+            roles = None,
+            phase = phase.map(Set(_)),
+            domain = domain.map(Set(_)),
+            activeAt = None
+          )
           .map(customsOffices =>
             Ok(officeDetailsPage(CustomsOffice.toViewModel(customsOffices(0))))
           )

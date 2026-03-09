@@ -28,18 +28,23 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.stubbing.Scenario
+import play.api.libs.json.Json
 import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.CustomsOfficeSummaryTestData
+import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.CustomsOfficeTestData
 
 class CRDLConnectorSpec
   extends AsyncFlatSpec
   with Matchers
   with WireMockSupport
   with HttpClientV2Support
-  with CustomsOfficeSummaryTestData {
+  with CustomsOfficeSummaryTestData
+  with CustomsOfficeTestData {
   given actorSystem: ActorSystem = ActorSystem("test")
   given HeaderCarrier            = HeaderCarrier()
 
   private val officeSumamriesUrl = "/crdl-cache/v2/offices/summaries"
+  private val officesDetailUrl   = "/crdl-cache/offices"
+  val defaultReferenceNumber     = "Default-1234"
 
   private val appConfig = new AppConfig(
     Configuration(
@@ -71,6 +76,18 @@ class CRDLConnectorSpec
     }
   }
 
+  def customsOfficesShouldError(errorResponse: () => ResponseDefinitionBuilder) = {
+    stubFor(
+      get(urlPathEqualTo(officesDetailUrl))
+        .withQueryParam("referenceNumbers", equalTo(defaultReferenceNumber))
+        .willReturn(errorResponse())
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      connector.fetchCustomsOffices(Some(Set(defaultReferenceNumber)), None, None, None, None, None)
+    }
+  }
+
   def customsOfficeSummariesTestRetry(
     errorResponse: () => ResponseDefinitionBuilder,
     shouldRetry: Boolean
@@ -97,6 +114,43 @@ class CRDLConnectorSpec
     } else {
       recoverToSucceededIf[UpstreamErrorResponse] {
         connector.fetchCustomsOfficeSummaries(1, 10)
+      }
+    }
+  }
+
+  def customsOfficesTestRetry(
+    errorResponse: () => ResponseDefinitionBuilder,
+    shouldRetry: Boolean
+  ) = {
+    stubFor(
+      get(urlPathEqualTo(officesDetailUrl))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(Scenario.STARTED)
+        .willReturn(errorResponse())
+        .willSetStateTo(failedState)
+    )
+
+    stubFor(
+      get(urlPathEqualTo(officesDetailUrl))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(failedState)
+        .willReturn(ok().withBody(Json.toJson(List(defaultCustomsOffice)).toString))
+    )
+
+    if (shouldRetry) {
+      connector
+        .fetchCustomsOffices(Some(Set(defaultReferenceNumber)), None, None, None, None, None)
+        .map(_ mustBe List(defaultCustomsOffice))
+    } else {
+      recoverToSucceededIf[UpstreamErrorResponse] {
+        connector.fetchCustomsOffices(
+          Some(Set(defaultReferenceNumber)),
+          None,
+          None,
+          None,
+          None,
+          None
+        )
       }
     }
   }
@@ -134,5 +188,44 @@ class CRDLConnectorSpec
 
   it should "should Retry when a server error is returned from the API" in {
     customsOfficeSummariesTestRetry(serverError, true)
+  }
+
+  "CRDLConnector.fetchCustomsOffices: return the data as delivered from the API" should "return the data as delivered from the API" in {
+    val expectedResult = defaultCustomsOffice
+
+    stubFor(
+      get(urlPathEqualTo(officesDetailUrl))
+        .withQueryParam("referenceNumbers", equalTo(defaultReferenceNumber))
+        .willReturn(
+          ok().withBody(Json.toJson(List(expectedResult)).toString)
+        )
+    )
+
+    connector
+      .fetchCustomsOffices(
+        referenceNumbers = Some(Set(defaultReferenceNumber)),
+        countryCodes = None,
+        roles = None,
+        phase = Some(Set("P6")),
+        domain = Some(Set("NCTS")),
+        activeAt = None
+      )
+      .map(_ mustBe List(expectedResult))
+  }
+
+  it should "throw UpstreamErrorResponse when a client error is returned for fetchCustomsOffices" in {
+    customsOfficesShouldError(badRequest)
+  }
+
+  it should "throw UpstreamErrorResponse when a server error is returned by the API for fetchCustomsOffices" in {
+    customsOfficesShouldError(serverError)
+  }
+
+  it should "should not Retry when a client error is returned for fetchCustomsOffices" in {
+    customsOfficesTestRetry(badRequest, false)
+  }
+
+  it should "should Retry when a server error is returned from the API for fetchCustomsOffices" in {
+    customsOfficesTestRetry(serverError, true)
   }
 }

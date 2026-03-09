@@ -34,8 +34,16 @@ object ViewUtils {
   val listsUrl                    = withBaseUrl("lists")
   def listDetailUrl(code: String) = withBaseUrl(s"lists/$code")
 
-  val officesUrl                               = withBaseUrl("offices")
-  def officeDetailUrl(referenceNumber: String) = withBaseUrl(s"offices/$referenceNumber")
+  val officesUrl = withBaseUrl("offices")
+
+  def officeDetailUrl(referenceNumber: String, phase: Option[String], domain: Option[String]) = {
+    val params = Seq(
+      phase.map(p => s"phase=$p"),
+      domain.map(d => s"domain=$d")
+    ).flatten
+    val queryString = if (params.isEmpty) "" else params.mkString("?", "&", "")
+    withBaseUrl(s"offices/$referenceNumber$queryString")
+  }
 
   def formatDateWithTime(instant: Option[Instant]): String =
     instant.fold("")(i => DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")).format(i))

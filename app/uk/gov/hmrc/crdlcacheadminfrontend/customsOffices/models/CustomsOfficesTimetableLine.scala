@@ -31,6 +31,6 @@ final case class CustomsOfficesTimetableLine(
 )
 
 object CustomsOfficesTimetableLine {
-  given Format[DayOfWeek]                  = Format.of[Int].bimap(DayOfWeek.of, _.getValue)
-  given Reads[CustomsOfficesTimetableLine] = Json.reads[CustomsOfficesTimetableLine]
+  given Format[DayOfWeek]                   = Format.of[Int].bimap(DayOfWeek.of, _.getValue)
+  given Format[CustomsOfficesTimetableLine] = Json.format[CustomsOfficesTimetableLine]
 }

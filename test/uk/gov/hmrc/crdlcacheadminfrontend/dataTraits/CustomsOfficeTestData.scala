@@ -60,6 +60,8 @@ trait CustomsOfficeTestData {
       spaceToAdd = false,
       streetAndNumber = s"$key, Benton Park View"
     ),
+    phase = Some("P6"),
+    domain = Some("NCTS"),
     customsOfficeTimetable = List()
   )
 

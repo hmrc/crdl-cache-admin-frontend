@@ -30,5 +30,5 @@ final case class CustomsOfficeDetail(
 )
 
 object CustomsOfficeDetail {
-  given Reads[CustomsOfficeDetail] = Json.reads[CustomsOfficeDetail]
+  given Format[CustomsOfficeDetail] = Json.format[CustomsOfficeDetail]
 }

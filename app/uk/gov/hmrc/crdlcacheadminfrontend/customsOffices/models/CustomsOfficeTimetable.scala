@@ -28,5 +28,5 @@ final case class CustomsOfficeTimetable(
 )
 
 object CustomsOfficeTimetable {
-  given Reads[CustomsOfficeTimetable] = Json.reads[CustomsOfficeTimetable]
+  given Format[CustomsOfficeTimetable] = Json.format[CustomsOfficeTimetable]
 }

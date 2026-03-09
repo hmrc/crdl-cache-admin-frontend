@@ -42,18 +42,18 @@
             head = Some(Seq(
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.referenceNumber"))),
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.countryCode"))),
-                HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.domain"))),
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.phase"))),
+                HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.domain"))),
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.name"))),
                 HeadCell()
             )),
             rows = customsOfficesPagedResult.items.map(c => Seq(
                 TableRow(content = Text(c.referenceNumber)),
                 TableRow(content = Text(c.countryCode)),
-                TableRow(content = Text(c.domain.getOrElse("-"))),
-                TableRow(content = Text(c.phase.getOrElse("-"))),
+                TableRow(content = Text(optionOrDefault(c.phase))),
+                TableRow(content = Text(optionOrDefault(c.domain))),
                 TableRow(content = Text(c.customsOfficeUsualName)),
-                TableRow(content = HtmlContent(link(s"office-${c.referenceNumber}", messages("links.details"), officeDetailUrl(c.referenceNumber), Some(s"for customs office ${c.customsOfficeUsualName}"))))
+                TableRow(content = HtmlContent(link(s"office-${c.referenceNumber}", messages("links.details"), officeDetailUrl(c.referenceNumber, c.phase, c.domain), Some(s"for customs office ${c.customsOfficeUsualName}"))))
             ))
         ))
     )

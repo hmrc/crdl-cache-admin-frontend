@@ -25,6 +25,8 @@ final case class CustomsOffice(
   referenceNumber: String,
   activeFrom: Option[Instant],
   activeTo: Option[Instant],
+  phase: Option[String],
+  domain: Option[String],
   referenceNumberMainOffice: Option[String],
   referenceNumberHigherAuthority: Option[String],
   referenceNumberCompetentAuthorityOfEnquiry: Option[String],
@@ -50,13 +52,15 @@ final case class CustomsOffice(
 )
 
 object CustomsOffice {
-  given Reads[CustomsOffice] = Json.reads[CustomsOffice]
+  given Format[CustomsOffice] = Json.format[CustomsOffice]
 
   def toViewModel(value: CustomsOffice): CustomsOfficeViewModel = CustomsOfficeViewModel(
     referenceNumber = value.referenceNumber,
     officeUsualName = value.customsOfficeLsd.customsOfficeUsualName,
     activeFrom = value.activeFrom,
     activeTo = value.activeFrom,
+    phase = value.phase,
+    domain = value.domain,
     location = Location(
       city = value.customsOfficeLsd.city,
       country = value.countryCode,

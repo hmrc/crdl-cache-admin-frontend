@@ -102,7 +102,10 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     fetchResult
   }
 
-  def fetchCustomsOfficeSummaries(pageNum: Int, pageSize: Int)(using
+  def fetchCustomsOfficeSummaries(
+    pageNum: Int,
+    pageSize: Int
+  )(using
     hc: HeaderCarrier,
     ec: ExecutionContext
   ): Future[PagedResult[CustomsOfficeSummary]] = {
@@ -112,7 +115,9 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-        .get(url"${crdlCacheCustomsOfficesUrlV2}/summaries?pageNum=$pageNum&pageSize=$pageSize")
+        .get(
+          url"${crdlCacheCustomsOfficesUrlV2}/summaries?pageNum=$pageNum&pageSize=$pageSize"
+        )
         .execute[PagedResult[CustomsOfficeSummary]](using
           throwOnFailure(readEitherOf[PagedResult[CustomsOfficeSummary]])
         )
@@ -127,17 +132,21 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     referenceNumbers: Option[Set[String]],
     countryCodes: Option[Set[String]],
     roles: Option[Set[String]],
+    phase: Option[Set[String]],
+    domain: Option[Set[String]],
     activeAt: Option[Instant]
   ): URL = {
-    val url = (referenceNumbers, countryCodes, roles, activeAt) match {
-      case (None, None, None, None) => crdlCacheCustomsOfficesUrl
+    val url = (referenceNumbers, countryCodes, roles, phase, domain, activeAt) match {
+      case (None, None, None, None, None, None) => crdlCacheCustomsOfficesUrl
       case _ =>
         crdlCacheCustomsOfficesUrl
           .concat(
             Seq(
               referenceNumbers.fold("")(r => s"referenceNumbers=${r.mkString(",")}"),
               countryCodes.fold("")(c => s"countryCodes=${c.mkString(",")}"),
-              roles.fold("")(r => s"roles=${r.mkString(",")}")
+              roles.fold("")(r => s"roles=${r.mkString(",")}"),
+              phase.fold("")(p => s"phase=${p.mkString(",")}"),
+              domain.fold("")(d => s"domain=${d.mkString(",")}")
             ).filterNot(_.isEmpty).mkString("?", "&", "")
           )
     }
@@ -148,6 +157,8 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     referenceNumbers: Option[Set[String]] = None,
     countryCodes: Option[Set[String]] = None,
     roles: Option[Set[String]] = None,
+    phase: Option[Set[String]],
+    domain: Option[Set[String]],
     activeAt: Option[Instant] = None
   )(using hc: HeaderCarrier, ec: ExecutionContext): Future[List[CustomsOffice]] = {
     logger.info(s"Fetching customs offices from crdl-cache")
@@ -161,7 +172,14 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     } {
       httpClient
         .get(
-          urlForCustomsOffices(referenceNumbers = referenceNumbers, countryCodes, roles, activeAt)
+          urlForCustomsOffices(
+            referenceNumbers = referenceNumbers,
+            countryCodes,
+            roles,
+            phase,
+            domain,
+            activeAt
+          )
         )
         .execute[List[CustomsOffice]](using throwOnFailure(readEitherOf[List[CustomsOffice]]))
     }

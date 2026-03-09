@@ -55,6 +55,8 @@ class CustomsOfficesControllerSpec
   private val defaultPageNum            = 1
   private val defaultPageSize           = 10
   private val defaultReferenceNumber    = "TestRef"
+  private val phase                     = "P6"
+  private val domain                    = "NCTS"
   private val defaultReferenceNumberSet = Some(Set(defaultReferenceNumber))
   private val defaultAuthToken          = UUID.randomUUID().toString
   private val defaultRequest            = FakeRequest().withSession("authToken" -> defaultAuthToken)
@@ -125,7 +127,33 @@ class CustomsOfficesControllerSpec
     referenceNumbers: Option[Set[String]] = defaultReferenceNumberSet
   ) =
     when(
-      crdlConnectorMock.fetchCustomsOffices(eqTo(referenceNumbers), any(), any(), any())(using
+      crdlConnectorMock.fetchCustomsOffices(
+        eqTo(referenceNumbers),
+        any(),
+        any(),
+        any(),
+        any(),
+        any()
+      )(using
+        any(),
+        eqTo(ec)
+      )
+    )
+      .thenReturn(Future.successful(payload))
+
+  def stubCRDLConnector_FetchCustomsOffices_Successful_Phase_Domain(
+    payload: List[CustomsOffice] = defaultCustomsOfficeList,
+    referenceNumbers: Option[Set[String]] = defaultReferenceNumberSet
+  ) =
+    when(
+      crdlConnectorMock.fetchCustomsOffices(
+        eqTo(referenceNumbers),
+        any(),
+        any(),
+        eqTo(Some(Set(phase))),
+        eqTo(Some(Set(domain))),
+        any()
+      )(using
         any(),
         eqTo(ec)
       )
@@ -136,7 +164,14 @@ class CustomsOfficesControllerSpec
     referenceNumbers: Option[Set[String]] = defaultReferenceNumberSet
   ) =
     when(
-      crdlConnectorMock.fetchCustomsOffices(eqTo(referenceNumbers), any(), any(), any())(using
+      crdlConnectorMock.fetchCustomsOffices(
+        eqTo(referenceNumbers),
+        any(),
+        any(),
+        any(),
+        any(),
+        any()
+      )(using
         any(),
         eqTo(ec)
       )
@@ -220,7 +255,19 @@ class CustomsOfficesControllerSpec
     stubCRDLConnector_FetchCustomsOffices_Successful()
     stubOfficeDetailPage_Successful()
 
-    val result = controller.officeDetail(defaultReferenceNumber)(defaultRequest)
+    val result = controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest)
+
+    status(result) shouldBe OK
+    contentType(result) shouldBe Some(MimeTypes.HTML)
+  }
+
+  "CustomsOfficesController.officeDetail" should "return 200 OK when there are no errors and phase and domain are present" in {
+    stubAuth_Successful()
+    stubCRDLConnector_FetchCustomsOffices_Successful_Phase_Domain()
+    stubOfficeDetailPage_Successful()
+
+    val result =
+      controller.officeDetail(defaultReferenceNumber, Some(phase), Some(domain))(defaultRequest)
 
     status(result) shouldBe OK
     contentType(result) shouldBe Some(MimeTypes.HTML)
@@ -232,7 +279,7 @@ class CustomsOfficesControllerSpec
     stubOfficeDetailPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.officeDetail(defaultReferenceNumber)(defaultRequest))
+      await(controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest))
     }
   }
 
@@ -243,7 +290,7 @@ class CustomsOfficesControllerSpec
     stubOfficeDetailPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.officeDetail(defaultReferenceNumber)(defaultRequest))
+      await(controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest))
     }
   }
 
@@ -252,7 +299,7 @@ class CustomsOfficesControllerSpec
     stubCRDLConnector_FetchCustomsOffices_Successful()
     stubOfficeDetailPage_Successful()
 
-    val result = controller.officeDetail(defaultReferenceNumber)(defaultRequest)
+    val result = controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest)
 
     status(result) shouldBe SEE_OTHER
     redirectLocation(result) shouldBe Some(
@@ -266,7 +313,7 @@ class CustomsOfficesControllerSpec
     stubOfficeDetailPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.officeDetail(defaultReferenceNumber)(defaultRequest))
+      await(controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest))
     }
   }
 }
