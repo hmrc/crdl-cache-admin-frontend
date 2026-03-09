@@ -28,6 +28,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.stubbing.Scenario
+import play.api.libs.json.Json
+import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.{CodeListSnapShotsTestData, CustomsOfficeSummaryTestData, CustomsOfficeTestData}
 import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.{
   CustomsOfficeSummaryTestData,
   CodeListSnapShotsTestData
@@ -49,8 +51,8 @@ class CRDLConnectorSpec
 
   private val officeSumamriesUrl = "/crdl-cache/v2/offices/summaries"
   private val officesDetailUrl   = "/crdl-cache/offices"
-  val defaultReferenceNumber     = "Default-1234"
   private val codeListSnapShotsUrl = "/crdl-cache/v2/lists"
+  val defaultReferenceNumber     = "Default-1234"
 
   private val appConfig = new AppConfig(
     Configuration(
@@ -82,6 +84,18 @@ class CRDLConnectorSpec
     }
   }
 
+  def customsOfficesShouldError(errorResponse: () => ResponseDefinitionBuilder) = {
+    stubFor(
+      get(urlPathEqualTo(officesDetailUrl))
+        .withQueryParam("referenceNumbers", equalTo(defaultReferenceNumber))
+        .willReturn(errorResponse())
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      connector.fetchCustomsOffices(Some(Set(defaultReferenceNumber)), None, None, None, None, None)
+    }
+  }
+
   def fetchCodeListSnapShotsError(errorResponse: () => ResponseDefinitionBuilder) = {
     stubFor(
       get(urlPathEqualTo(codeListSnapShotsUrl))
@@ -92,18 +106,6 @@ class CRDLConnectorSpec
 
     recoverToSucceededIf[UpstreamErrorResponse] {
       connector.fetchCodeListSnapShots(1, 10)
-    }
-  }
-
-  def customsOfficesShouldError(errorResponse: () => ResponseDefinitionBuilder) = {
-    stubFor(
-      get(urlPathEqualTo(officesDetailUrl))
-        .withQueryParam("referenceNumbers", equalTo(defaultReferenceNumber))
-        .willReturn(errorResponse())
-    )
-
-    recoverToSucceededIf[UpstreamErrorResponse] {
-      connector.fetchCustomsOffices(Some(Set(defaultReferenceNumber)), None, None, None, None, None)
     }
   }
 
@@ -136,6 +138,7 @@ class CRDLConnectorSpec
       }
     }
   }
+
 
   def fetchCodeListSnapShotsTestRetry(
                                        errorResponse: () => ResponseDefinitionBuilder,
