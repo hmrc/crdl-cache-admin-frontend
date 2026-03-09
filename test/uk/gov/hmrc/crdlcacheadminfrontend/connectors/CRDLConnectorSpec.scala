@@ -29,30 +29,27 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.stubbing.Scenario
 import play.api.libs.json.Json
-import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.{CodeListSnapShotsTestData, CustomsOfficeSummaryTestData, CustomsOfficeTestData}
 import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.{
+  CodeListSnapShotsTestData,
   CustomsOfficeSummaryTestData,
-  CodeListSnapShotsTestData
+  CustomsOfficeTestData
 }
-import play.api.libs.json.Json
-import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.CustomsOfficeSummaryTestData
-import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.CustomsOfficeTestData
 
 class CRDLConnectorSpec
   extends AsyncFlatSpec
   with Matchers
   with WireMockSupport
   with HttpClientV2Support
-  with CustomsOfficeTestData
   with CustomsOfficeSummaryTestData
-  with CodeListSnapShotsTestData {
+  with CodeListSnapShotsTestData
+  with CustomsOfficeTestData {
   given actorSystem: ActorSystem = ActorSystem("test")
   given HeaderCarrier            = HeaderCarrier()
 
-  private val officeSumamriesUrl = "/crdl-cache/v2/offices/summaries"
-  private val officesDetailUrl   = "/crdl-cache/offices"
+  private val officeSumamriesUrl   = "/crdl-cache/v2/offices/summaries"
+  private val officesDetailUrl     = "/crdl-cache/offices"
   private val codeListSnapShotsUrl = "/crdl-cache/v2/lists"
-  val defaultReferenceNumber     = "Default-1234"
+  val defaultReferenceNumber       = "Default-1234"
 
   private val appConfig = new AppConfig(
     Configuration(
@@ -139,37 +136,6 @@ class CRDLConnectorSpec
     }
   }
 
-
-  def fetchCodeListSnapShotsTestRetry(
-                                       errorResponse: () => ResponseDefinitionBuilder,
-                                       shouldRetry: Boolean
-                                     ) = {
-    stubFor(
-      get(urlEqualTo(s"$codeListSnapShotsUrl?pageNum=1&pageSize=10"))
-        .inScenario(retryScenario)
-        .whenScenarioStateIs(Scenario.STARTED)
-        .willReturn(errorResponse())
-        .willSetStateTo(failedState)
-    )
-
-    stubFor(
-      get(urlEqualTo(s"$codeListSnapShotsUrl?pageNum=1&pageSize=10"))
-        .inScenario(retryScenario)
-        .whenScenarioStateIs(failedState)
-        .willReturn(ok().withBody(asJson(pagedCodeListSnapShotResult)))
-    )
-
-    if (shouldRetry) {
-      connector
-        .fetchCodeListSnapShots(1, 10)
-        .map(_ mustBe pagedCodeListSnapShotResult)
-    } else {
-      recoverToSucceededIf[UpstreamErrorResponse] {
-        connector.fetchCodeListSnapShots(1, 10)
-      }
-    }
-  }
-
   def customsOfficesTestRetry(
     errorResponse: () => ResponseDefinitionBuilder,
     shouldRetry: Boolean
@@ -203,6 +169,36 @@ class CRDLConnectorSpec
           None,
           None
         )
+      }
+    }
+  }
+
+  def fetchCodeListSnapShotsTestRetry(
+    errorResponse: () => ResponseDefinitionBuilder,
+    shouldRetry: Boolean
+  ) = {
+    stubFor(
+      get(urlEqualTo(s"$codeListSnapShotsUrl?pageNum=1&pageSize=10"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(Scenario.STARTED)
+        .willReturn(errorResponse())
+        .willSetStateTo(failedState)
+    )
+
+    stubFor(
+      get(urlEqualTo(s"$codeListSnapShotsUrl?pageNum=1&pageSize=10"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(failedState)
+        .willReturn(ok().withBody(asJson(pagedCodeListSnapShotResult)))
+    )
+
+    if (shouldRetry) {
+      connector
+        .fetchCodeListSnapShots(1, 10)
+        .map(_ mustBe pagedCodeListSnapShotResult)
+    } else {
+      recoverToSucceededIf[UpstreamErrorResponse] {
+        connector.fetchCodeListSnapShots(1, 10)
       }
     }
   }
@@ -300,6 +296,10 @@ class CRDLConnectorSpec
       .map(_ mustBe List(expectedResult))
   }
 
+  it should "should Retry when a server error is returned from the API for fetchCustomsOffices" in {
+    customsOfficesTestRetry(serverError, true)
+  }
+
   it should "throw UpstreamErrorResponse when a client error is returned for fetchCustomsOffices" in {
     customsOfficesShouldError(badRequest)
   }
@@ -310,9 +310,5 @@ class CRDLConnectorSpec
 
   it should "should not Retry when a client error is returned for fetchCustomsOffices" in {
     customsOfficesTestRetry(badRequest, false)
-  }
-
-  it should "should Retry when a server error is returned from the API for fetchCustomsOffices" in {
-    customsOfficesTestRetry(serverError, true)
   }
 }
