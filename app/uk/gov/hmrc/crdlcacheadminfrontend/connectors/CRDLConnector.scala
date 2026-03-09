@@ -42,13 +42,14 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
   override protected def configuration: Config    = config.config.underlying
 
   private val crdlCacheCodeListsUrl        = s"${config.crdlCacheUrl}/lists"
+  private val crdlCacheCodeListsUrlV2      = s"${config.crdlCacheUrl}/v2/lists"
   private val crdlCacheCustomsOfficesUrl   = s"${config.crdlCacheUrl}/offices"
   private val crdlCacheCustomsOfficesUrlV2 = s"${config.crdlCacheUrl}/v2/offices"
 
-  def fetchCodeListSnapShots()(using
+  def fetchCodeListSnapShots(pageNum: Int, pageSize: Int)(using
     hc: HeaderCarrier,
     ex: ExecutionContext
-  ): Future[List[CodeListSnapshot]] = {
+  ): Future[PagedResult[CodeListSnapshot]] = {
     logger.info(s"Fetching codelist snapshots from crdl-cache")
     val fetchResult = retryFor(s"fetch of codelist snapshots") {
       // No point in retrying if our request is wrong
@@ -57,8 +58,10 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-        .get(url"${config.crdlCacheUrl}/lists")
-        .execute[List[CodeListSnapshot]](using throwOnFailure(readEitherOf[List[CodeListSnapshot]]))
+        .get(url"$crdlCacheCodeListsUrlV2?pageNum=$pageNum&pageSize=$pageSize")
+        .execute[PagedResult[CodeListSnapshot]](using
+          throwOnFailure(readEitherOf[PagedResult[CodeListSnapshot]])
+        )
     }
     fetchResult.failed.foreach(err =>
       logger.error("Retries exceeded while fetching code list snapshots", err)
