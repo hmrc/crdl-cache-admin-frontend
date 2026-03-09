@@ -222,6 +222,25 @@ class CRDLConnectorSpec
       .map(_ mustBe expectedResult)
   }
 
+  "CRDLConnector.fetchCodeListSnapShots: return the data as delivered from the API" should "return the data as delivered from the API" in {
+    val expectedResult = pagedCodeListSnapShotResult
+    val pageNum        = 1
+    val pageSize       = pagedCodeListSnapShotResult.items.length
+
+    stubFor(
+      get(urlPathEqualTo(codeListSnapShotsUrl))
+        .withQueryParam("pageNum", equalTo(s"$pageNum"))
+        .withQueryParam("pageSize", equalTo(s"$pageSize"))
+        .willReturn(
+          ok().withBody(asJson(pagedCodeListSnapShotResult))
+        )
+    )
+
+    connector
+      .fetchCodeListSnapShots(pageNum, pageSize)
+      .map(_ mustBe expectedResult)
+  }
+
   it should "throw UpstreamErrorResponse when a client error is returned" in {
     customsOfficeSummariesShouldError(badRequest)
   }
