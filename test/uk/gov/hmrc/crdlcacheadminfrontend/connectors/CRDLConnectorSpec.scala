@@ -29,8 +29,9 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.stubbing.Scenario
 import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.{
+  CodeListSnapShotsTestData,
   CustomsOfficeSummaryTestData,
-  CodeListSnapShotsTestData
+  CustomsOfficeTestData
 }
 import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.{CustomsOffice, CustomsOfficeDetail}
 
@@ -40,14 +41,14 @@ class CRDLConnectorSpec
   with WireMockSupport
   with HttpClientV2Support
   with CustomsOfficeSummaryTestData
-  with CustomsOfficeTestData 
+  with CustomsOfficeTestData
   with CodeListSnapShotsTestData {
-    
+
   given actorSystem: ActorSystem = ActorSystem("test")
   given HeaderCarrier            = HeaderCarrier()
 
-  private val officeSumamriesUrl  = "/crdl-cache/v2/offices/summaries"
-  private val officeDetailBaseUrl = "/crdl-cache/v2/offices"
+  private val officeSumamriesUrl   = "/crdl-cache/v2/offices/summaries"
+  private val officeDetailBaseUrl  = "/crdl-cache/v2/offices"
   private val codeListSnapShotsUrl = "/crdl-cache/v2/lists"
 
   private val appConfig = new AppConfig(
@@ -325,7 +326,7 @@ class CRDLConnectorSpec
     customsOfficeTimetable = List()
   )
 
-  def officeDetailShouldError(errorResponse: () => ResponseDefinitionBuilder) =
+  def officeDetailShouldError(errorResponse: () => ResponseDefinitionBuilder) = {
     stubFor(
       get(urlEqualTo(officeDetailUrl))
         .willReturn(errorResponse())
@@ -334,8 +335,12 @@ class CRDLConnectorSpec
     recoverToSucceededIf[UpstreamErrorResponse] {
       connector.fetchCustomsOfficeDetail(officeDetailReferenceNumber)
     }
+  }
 
-  def officeDetailTestRetry(errorResponse: () => ResponseDefinitionBuilder, shouldRetry: Boolean) =
+  def officeDetailTestRetry(
+    errorResponse: () => ResponseDefinitionBuilder,
+    shouldRetry: Boolean
+  ) = {
     stubFor(
       get(urlEqualTo(officeDetailUrl))
         .inScenario(retryScenario)
@@ -359,6 +364,7 @@ class CRDLConnectorSpec
       recoverToSucceededIf[UpstreamErrorResponse] {
         connector.fetchCustomsOfficeDetail(officeDetailReferenceNumber)
       }
+  }
 
   "CRDLConnector.fetchCustomsOfficeDetail" should "return Some(office) when the office is found" in {
     stubFor(
@@ -396,6 +402,8 @@ class CRDLConnectorSpec
 
   it should "retry when a server error is returned" in {
     officeDetailTestRetry(serverError, true)
+  }
+
   it should "throw UpstreamErrorResponse when a client error is returned for fetchCodeListSnapShots" in {
     fetchCodeListSnapShotsError(badRequest)
   }
