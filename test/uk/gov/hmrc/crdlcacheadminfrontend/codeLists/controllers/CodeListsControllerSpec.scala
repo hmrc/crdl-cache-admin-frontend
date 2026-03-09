@@ -34,6 +34,8 @@ import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.CodeListSnapshot
 import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.views.html.{ListDetail, Lists}
 import uk.gov.hmrc.crdlcacheadminfrontend.connectors.CRDLConnector
 import uk.gov.hmrc.crdlcacheadminfrontend.views.html.NotFound
+import uk.gov.hmrc.crdlcacheadminfrontend.config.AppConfig
+import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.internalauth.client.Retrieval
 import uk.gov.hmrc.internalauth.client.Retrieval.EmptyRetrieval
@@ -55,13 +57,21 @@ class CodeListsControllerSpec
 
   private val authToken = UUID.randomUUID().toString
 
+  private val configMock      = mock[AppConfig]
   private val authStub        = mock[StubBehaviour]
   private val crdlConnector   = mock[CRDLConnector]
   private val notFoundPage    = mock[NotFound]
   private val listsPage       = mock[Lists]
   private val listDetailsPage = mock[ListDetail]
 
+  private val defaultPageNum     = 1
+  private val defaultPageSize    = 10
+  private val defaultItemsInPage = 10
+  private val defaultTotalItems  = 10
+  private val defaultTotalPages  = 1
+
   val controller = new CodeListsController(
+    configMock,
     FrontendAuthComponentsStub(authStub),
     crdlConnector,
     mcc,
@@ -89,16 +99,44 @@ class CodeListsControllerSpec
     when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
       .thenReturn(Future.unit)
 
-    when(crdlConnector.fetchCodeListSnapShots()(using any(), eqTo(ec)))
-      .thenReturn(Future.successful(codeListSnapshots))
-
     // TODO: Decide what to do about lexical ordering as it will sort 1xx codes awkwardly
     val orderedSnapshots = List(BC08, BC108, BC36, BC66, CL190)
 
-    when(listsPage(eqTo(orderedSnapshots))(using any(), any())).thenReturn(HtmlFormat.empty)
+    when(
+      crdlConnector.fetchCodeListSnapShots(eqTo(defaultPageNum), eqTo(defaultPageSize))(using
+        any(),
+        eqTo(ec)
+      )
+    ).thenReturn(
+      Future.successful(
+        PagedResult(
+          orderedSnapshots,
+          defaultPageNum,
+          defaultPageSize,
+          defaultItemsInPage,
+          defaultTotalItems,
+          defaultTotalPages
+        )
+      )
+    )
+
+    when(
+      listsPage(
+        eqTo(
+          PagedResult(
+            orderedSnapshots,
+            defaultPageNum,
+            defaultPageSize,
+            defaultItemsInPage,
+            defaultTotalItems,
+            defaultTotalPages
+          )
+        )
+      )(using any(), any())
+    ).thenReturn(HtmlFormat.empty)
 
     val request = FakeRequest().withSession("authToken" -> authToken)
-    val result  = controller.viewLists(request)
+    val result  = controller.viewLists(Some(defaultPageNum), Some(defaultPageSize))(request)
 
     status(result) shouldBe OK
     contentType(result) shouldBe Some(MimeTypes.HTML)
@@ -108,13 +146,18 @@ class CodeListsControllerSpec
     when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
       .thenReturn(Future.failed(UpstreamErrorResponse("Oh no!", INTERNAL_SERVER_ERROR)))
 
-    when(crdlConnector.fetchCodeListSnapShots()(using any(), eqTo(ec)))
+    when(
+      crdlConnector.fetchCodeListSnapShots(eqTo(defaultPageNum), eqTo(defaultPageSize))(using
+        any(),
+        eqTo(ec)
+      )
+    )
       .thenReturn(Future.successful(List.empty))
 
     val request = FakeRequest().withSession("authToken" -> authToken)
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.viewLists(request))
+      await(controller.viewLists(Some(defaultPageNum), Some(defaultPageSize))(request))
     }
   }
 
@@ -122,13 +165,18 @@ class CodeListsControllerSpec
     when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
       .thenReturn(Future.unit)
 
-    when(crdlConnector.fetchCodeListSnapShots()(using any(), eqTo(ec)))
+    when(
+      crdlConnector.fetchCodeListSnapShots(eqTo(defaultPageNum), eqTo(defaultPageSize))(using
+        any(),
+        eqTo(ec)
+      )
+    )
       .thenReturn(Future.failed(UpstreamErrorResponse("Oh no!", INTERNAL_SERVER_ERROR)))
 
     val request = FakeRequest().withSession("authToken" -> authToken)
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.viewLists(request))
+      await(controller.viewLists(Some(defaultPageNum), Some(defaultPageSize))(request))
     }
   }
 
@@ -136,11 +184,16 @@ class CodeListsControllerSpec
     when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
       .thenReturn(Future.failed(UpstreamErrorResponse("Unauthorized", UNAUTHORIZED)))
 
-    when(crdlConnector.fetchCodeListSnapShots()(using any(), eqTo(ec)))
+    when(
+      crdlConnector.fetchCodeListSnapShots(eqTo(defaultPageNum), eqTo(defaultPageSize))(using
+        any(),
+        eqTo(ec)
+      )
+    )
       .thenReturn(Future.successful(List.empty))
 
     val request = FakeRequest().withSession("authToken" -> authToken)
-    val result  = controller.viewLists(request)
+    val result  = controller.viewLists(Some(defaultPageNum), Some(defaultPageSize))(request)
 
     status(result) shouldBe SEE_OTHER
     redirectLocation(result) shouldBe Some(
@@ -153,13 +206,18 @@ class CodeListsControllerSpec
     when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
       .thenReturn(Future.failed(UpstreamErrorResponse("Forbidden", FORBIDDEN)))
 
-    when(crdlConnector.fetchCodeListSnapShots()(using any(), eqTo(ec)))
+    when(
+      crdlConnector.fetchCodeListSnapShots(eqTo(defaultPageNum), eqTo(defaultPageSize))(using
+        any(),
+        eqTo(ec)
+      )
+    )
       .thenReturn(Future.successful(List.empty))
 
     val request = FakeRequest().withSession("authToken" -> authToken)
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.viewLists(request))
+      await(controller.viewLists(Some(defaultPageNum), Some(defaultPageSize))(request))
     }
   }
 }

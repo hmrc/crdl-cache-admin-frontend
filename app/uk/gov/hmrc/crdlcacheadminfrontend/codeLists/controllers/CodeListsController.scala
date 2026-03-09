@@ -23,6 +23,7 @@ import uk.gov.hmrc.crdlcacheadminfrontend.auth.Permissions
 import uk.gov.hmrc.crdlcacheadminfrontend.connectors.CRDLConnector
 import uk.gov.hmrc.crdlcacheadminfrontend.views.html.NotFound
 import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.views.html.{ListDetail, Lists}
+import uk.gov.hmrc.crdlcacheadminfrontend.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
@@ -30,6 +31,7 @@ import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
 
 @Singleton
 class CodeListsController @Inject (
+  config: AppConfig,
   auth: FrontendAuthComponents,
   crdlConnector: CRDLConnector,
   mcc: MessagesControllerComponents,
@@ -39,35 +41,35 @@ class CodeListsController @Inject (
 )(using ExecutionContext)
   extends FrontendController(mcc)
   with I18nSupport {
-  def viewLists: Action[AnyContent] =
+  def viewLists(page: Option[Int], pageSize: Option[Int]): Action[AnyContent] =
     auth
       .authorizedAction(
         continueUrl = routes.CodeListsController.viewLists(),
         predicate = Permissions.read
       )
       .async { implicit request =>
-        crdlConnector.fetchCodeListSnapShots().map { snapshots =>
-          val sortedSnapshots = snapshots
-            .sortWith((a, b) => a.codeListCode.toLowerCase() < b.codeListCode.toLowerCase())
-          Ok(listsPage(sortedSnapshots))
-        }
+        crdlConnector
+          .fetchCodeListSnapShots(page.getOrElse(1), pageSize.getOrElse(config.defaultPageSize))
+          .map { snapshots =>
+            Ok(listsPage(snapshots))
+          }
       }
 
-  def listDetail(code: String): Action[AnyContent] =
+  def listDetail(code: String, pageNum: Int, pageSize: Int): Action[AnyContent] =
     auth
       .authorizedAction(
-        continueUrl = routes.CodeListsController.listDetail(code),
+        continueUrl = routes.CodeListsController.listDetail(code, pageNum, pageSize),
         predicate = Permissions.read
       )
       .async { implicit request =>
         val messages        = request.messages
         val codeListsFuture = crdlConnector.fetchCodeList(code)
-        val snapshotsFuture = crdlConnector.fetchCodeListSnapShots()
+        val snapshotsFuture = crdlConnector.fetchCodeListSnapShots(pageNum, pageSize)
         for {
           codeLists <- codeListsFuture
           snapshots <- snapshotsFuture
         } yield {
-          snapshots
+          snapshots.items
             .find(s => s.codeListCode == code)
             .fold {
               Ok(

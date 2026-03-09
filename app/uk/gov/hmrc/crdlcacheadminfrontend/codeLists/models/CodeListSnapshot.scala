@@ -28,5 +28,5 @@ case class CodeListSnapshot(
 )
 
 object CodeListSnapshot {
-  given Reads[CodeListSnapshot] = Json.reads[CodeListSnapshot]
+  given Format[CodeListSnapshot] = Json.format[CodeListSnapshot]
 }
