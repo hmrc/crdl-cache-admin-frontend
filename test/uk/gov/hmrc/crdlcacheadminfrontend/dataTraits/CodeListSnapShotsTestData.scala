@@ -16,28 +16,29 @@
 
 package uk.gov.hmrc.crdlcacheadminfrontend.dataTraits
 
-import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.CustomsOfficeSummary
+import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.CodeListSnapshot
 import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
+import java.time.Instant
 
-case class CustomsOfficeSummaryOptions()
+case class CodeListSnapShotsOptions()
 
-trait CustomsOfficeSummaryTestData extends PagedResultTestData {
-  def generateCustomOfficeSummary(key: String) = CustomsOfficeSummary(
-    referenceNumber = s"$key-ReferenceNumber",
-    countryCode = "CC",
-    customsOfficeUsualName = s"$key Customs Office",
+trait CodeListSnapShotsTestData extends PagedResultTestData {
+  def generateCodeList(key: String, version: Int) = CodeListSnapshot(
+    codeListCode = s"CL$key",
+    snapshotVersion = version,
     phase = Some("P6"),
-    domain = Some("NCTS")
+    domain = Some("NCTS"),
+    lastUpdated = Some(Instant.now())
   )
 
-  lazy val pagedCustomsOfficeSummaryResult: PagedResult[CustomsOfficeSummary] =
+  lazy val pagedCodeListSnapShotResult: PagedResult[CodeListSnapshot] =
     pagedResult(
       Seq(
-        generateCustomOfficeSummary("01"),
-        generateCustomOfficeSummary("02"),
-        generateCustomOfficeSummary("03"),
-        generateCustomOfficeSummary("04"),
-        generateCustomOfficeSummary("05")
+        generateCodeList("001", 1),
+        generateCodeList("002", 2),
+        generateCodeList("003", 3),
+        generateCodeList("004", 4),
+        generateCodeList("005", 5)
       ),
       totalItems = Some(15),
       totalPages = Some(3)
