@@ -39,7 +39,13 @@ class CustomsOfficesController @Inject (
 )(using ExecutionContext)
   extends FrontendController(mcc)
   with I18nSupport {
-  def viewOffices(page: Option[Int], pageSize: Option[Int]) =
+  def viewOffices(
+    page: Option[Int],
+    pageSize: Option[Int],
+    referenceNumber: Option[String],
+    countryCode: Option[String],
+    officeName: Option[String]
+  ) =
     auth
       .authorizedAction(
         continueUrl = routes.CustomsOfficesController.viewOffices(),
@@ -49,9 +55,21 @@ class CustomsOfficesController @Inject (
         crdlConnector
           .fetchCustomsOfficeSummaries(
             page.getOrElse(1),
-            pageSize.getOrElse(config.defaultPageSize)
+            pageSize.getOrElse(config.defaultPageSize),
+            referenceNumber.filter(_.nonEmpty),
+            countryCode.filter(_.nonEmpty),
+            officeName.filter(_.nonEmpty)
           )
-          .map(pagedOfficesResult => Ok(officesPage(pagedOfficesResult)))
+          .map(pagedOfficesResult =>
+            Ok(
+              officesPage(
+                pagedOfficesResult,
+                referenceNumber.filter(_.nonEmpty),
+                countryCode.filter(_.nonEmpty),
+                officeName.filter(_.nonEmpty)
+              )
+            )
+          )
       }
 
   def officeDetail(referenceNumber: String) =
@@ -62,9 +80,10 @@ class CustomsOfficesController @Inject (
       )
       .async { implicit request =>
         crdlConnector
-          .fetchCustomsOffices(referenceNumbers = Some(Set(referenceNumber)))
-          .map(customsOffices =>
-            Ok(officeDetailsPage(CustomsOffice.toViewModel(customsOffices(0))))
-          )
+          .fetchCustomsOfficeDetail(referenceNumber)
+          .map {
+            case Some(office) => Ok(officeDetailsPage(CustomsOffice.toViewModel(office)))
+            case None         => NotFound
+          }
       }
 }

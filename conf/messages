@@ -48,6 +48,12 @@ customsOffices.viewOffices.table.headings.referenceNumber = Reference Number
 customsOffices.viewOffices.table.headings.countryCode = Country Code
 customsOffices.viewOffices.table.headings.name = Office Name
 
+customsOffices.viewOffices.search.heading = Search
+customsOffices.viewOffices.search.referenceNumber = Reference Number
+customsOffices.viewOffices.search.countryCode = Country Code
+customsOffices.viewOffices.search.officeName = Office Name
+customsOffices.viewOffices.search.button = Search
+
 
 customsOffices.officeDetails.pageTitle = Customs Office: {0}
 
