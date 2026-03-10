@@ -58,7 +58,7 @@ object CustomsOffice {
     referenceNumber = value.referenceNumber,
     officeUsualName = value.customsOfficeLsd.customsOfficeUsualName,
     activeFrom = value.activeFrom,
-    activeTo = value.activeFrom,
+    activeTo = value.activeTo,
     phase = value.phase,
     domain = value.domain,
     location = Location(
