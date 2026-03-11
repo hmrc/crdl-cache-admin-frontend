@@ -25,7 +25,9 @@ trait CustomsOfficeSummaryTestData extends PagedResultTestData {
   def generateCustomOfficeSummary(key: String) = CustomsOfficeSummary(
     referenceNumber = s"$key-ReferenceNumber",
     countryCode = "CC",
-    customsOfficeUsualName = s"$key Customs Office"
+    customsOfficeUsualName = s"$key Customs Office",
+    phase = Some("P6"),
+    domain = Some("NCTS")
   )
 
   lazy val pagedCustomsOfficeSummaryResult: PagedResult[CustomsOfficeSummary] =

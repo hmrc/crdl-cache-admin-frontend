@@ -24,5 +24,5 @@ final case class CustomsOfficeRoleTrafficCompetence(
 )
 
 object CustomsOfficeRoleTrafficCompetence {
-  given Reads[CustomsOfficeRoleTrafficCompetence] = Json.reads[CustomsOfficeRoleTrafficCompetence]
+  given Format[CustomsOfficeRoleTrafficCompetence] = Json.format[CustomsOfficeRoleTrafficCompetence]
 }

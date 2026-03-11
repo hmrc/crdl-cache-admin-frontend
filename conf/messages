@@ -46,6 +46,8 @@ codeLists.listDetail.table.headings.properties = Properties
 customsOffices.viewOffices.pageTitle = Customs Offices
 customsOffices.viewOffices.table.headings.referenceNumber = Reference Number
 customsOffices.viewOffices.table.headings.countryCode = Country Code
+customsOffices.viewOffices.table.headings.domain = Domain
+customsOffices.viewOffices.table.headings.phase = Phase
 customsOffices.viewOffices.table.headings.name = Office Name
 
 customsOffices.viewOffices.search.heading = Search
@@ -61,6 +63,8 @@ customsOffices.officeDetails.summary.keys.ref = Reference Number
 customsOffices.officeDetails.summary.keys.name = Usual Name
 customsOffices.officeDetails.summary.keys.activeFrom = Active From
 customsOffices.officeDetails.summary.keys.activeTo = Active To
+customsOffices.officeDetails.summary.specific.keys.phase = Phase
+customsOffices.officeDetails.summary.specific.keys.domain = Domain
 
 customsOffices.officeDetails.summary.location.card = Location
 customsOffices.officeDetails.summary.location.keys.city = City
