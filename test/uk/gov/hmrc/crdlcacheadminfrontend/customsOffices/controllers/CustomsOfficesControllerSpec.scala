@@ -52,14 +52,11 @@ class CustomsOfficesControllerSpec
   with BeforeAndAfterEach
   with CustomsOfficeSummaryTestData
   with CustomsOfficeTestData {
-  private val defaultPageNum            = 1
-  private val defaultPageSize           = 10
-  private val defaultReferenceNumber    = "TestRef"
-  private val phase                     = "P6"
-  private val domain                    = "NCTS"
-  private val defaultReferenceNumberSet = Some(Set(defaultReferenceNumber))
-  private val defaultAuthToken          = UUID.randomUUID().toString
-  private val defaultRequest            = FakeRequest().withSession("authToken" -> defaultAuthToken)
+  private val defaultPageNum         = 1
+  private val defaultPageSize        = 10
+  private val defaultReferenceNumber = "TestRef"
+  private val defaultAuthToken       = UUID.randomUUID().toString
+  private val defaultRequest         = FakeRequest().withSession("authToken" -> defaultAuthToken)
   private val expectedOfficesRedirectUrl =
     "/internal-auth-frontend/sign-in?continue_url=%2Fcrdl-cache-admin-frontend%2F"
 
@@ -139,67 +136,6 @@ class CustomsOfficesControllerSpec
         any(),
         any()
       )(using any(), eqTo(ec))
-    )
-      .thenReturn(
-        Future.failed(
-          UpstreamErrorResponse("Customs office summaries called failed", INTERNAL_SERVER_ERROR)
-        )
-      )
-
-  // ...fetchCustomsOffices
-  def stubCRDLConnector_FetchCustomsOffices_Successful(
-    payload: List[CustomsOffice] = defaultCustomsOfficeList,
-    referenceNumbers: Option[Set[String]] = defaultReferenceNumberSet
-  ) =
-    when(
-      crdlConnectorMock.fetchCustomsOffices(
-        eqTo(referenceNumbers),
-        any(),
-        any(),
-        any(),
-        any(),
-        any()
-      )(using
-        any(),
-        eqTo(ec)
-      )
-    )
-      .thenReturn(Future.successful(payload))
-
-  def stubCRDLConnector_FetchCustomsOffices_Successful_Phase_Domain(
-    payload: List[CustomsOffice] = defaultCustomsOfficeList,
-    referenceNumbers: Option[Set[String]] = defaultReferenceNumberSet
-  ) =
-    when(
-      crdlConnectorMock.fetchCustomsOffices(
-        eqTo(referenceNumbers),
-        any(),
-        any(),
-        eqTo(Some(Set(phase))),
-        eqTo(Some(Set(domain))),
-        any()
-      )(using
-        any(),
-        eqTo(ec)
-      )
-    )
-      .thenReturn(Future.successful(payload))
-
-  def stubCRDLConnector_FetchCustomsOffices_ThrowsUpsteamErrorResponse(
-    referenceNumbers: Option[Set[String]] = defaultReferenceNumberSet
-  ) =
-    when(
-      crdlConnectorMock.fetchCustomsOffices(
-        eqTo(referenceNumbers),
-        any(),
-        any(),
-        any(),
-        any(),
-        any()
-      )(using
-        any(),
-        eqTo(ec)
-      )
     )
       .thenReturn(
         Future.failed(
@@ -319,19 +255,7 @@ class CustomsOfficesControllerSpec
     stubCRDLConnector_FetchCustomsOfficeDetail_Successful()
     stubOfficeDetailPage_Successful()
 
-    val result = controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest)
-
-    status(result) shouldBe OK
-    contentType(result) shouldBe Some(MimeTypes.HTML)
-  }
-
-  "CustomsOfficesController.officeDetail" should "return 200 OK when there are no errors and phase and domain are present" in {
-    stubAuth_Successful()
-    stubCRDLConnector_FetchCustomsOffices_Successful_Phase_Domain()
-    stubOfficeDetailPage_Successful()
-
-    val result =
-      controller.officeDetail(defaultReferenceNumber, Some(phase), Some(domain))(defaultRequest)
+    val result = controller.officeDetail(defaultReferenceNumber)(defaultRequest)
 
     status(result) shouldBe OK
     contentType(result) shouldBe Some(MimeTypes.HTML)
@@ -352,7 +276,7 @@ class CustomsOfficesControllerSpec
     stubOfficeDetailPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest))
+      await(controller.officeDetail(defaultReferenceNumber)(defaultRequest))
     }
   }
 
@@ -363,7 +287,7 @@ class CustomsOfficesControllerSpec
     stubOfficeDetailPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest))
+      await(controller.officeDetail(defaultReferenceNumber)(defaultRequest))
     }
   }
 
@@ -372,7 +296,7 @@ class CustomsOfficesControllerSpec
     stubCRDLConnector_FetchCustomsOfficeDetail_Successful()
     stubOfficeDetailPage_Successful()
 
-    val result = controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest)
+    val result = controller.officeDetail(defaultReferenceNumber)(defaultRequest)
 
     status(result) shouldBe SEE_OTHER
     redirectLocation(result) shouldBe Some(
@@ -386,7 +310,7 @@ class CustomsOfficesControllerSpec
     stubOfficeDetailPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest))
+      await(controller.officeDetail(defaultReferenceNumber)(defaultRequest))
     }
   }
 
