@@ -105,6 +105,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     fetchResult
   }
 
+<<<<<<< CRDL-494
   def fetchCustomsOfficeSummaries(
     pageNum: Int,
     pageSize: Int
@@ -112,6 +113,32 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     hc: HeaderCarrier,
     ec: ExecutionContext
   ): Future[PagedResult[CustomsOfficeSummary]] = {
+=======
+  private def urlForCustomsOfficeSummaries(
+    pageNum: Int,
+    pageSize: Int,
+    referenceNumber: Option[String],
+    countryCode: Option[String],
+    officeName: Option[String]
+  ): URL = {
+    val filterParams = Seq(
+      referenceNumber.map(r => s"referenceNumber=$r"),
+      countryCode.map(c => s"countryCode=$c"),
+      officeName.map(n => s"officeName=$n")
+    ).flatten
+    val allParams = (Seq(s"pageNum=$pageNum", s"pageSize=$pageSize") ++ filterParams).mkString("&")
+    val urlString = s"$crdlCacheCustomsOfficesUrlV2/summaries?$allParams"
+    url"$urlString"
+  }
+
+  def fetchCustomsOfficeSummaries(
+    pageNum: Int,
+    pageSize: Int,
+    referenceNumber: Option[String] = None,
+    countryCode: Option[String] = None,
+    officeName: Option[String] = None
+  )(using hc: HeaderCarrier, ec: ExecutionContext): Future[PagedResult[CustomsOfficeSummary]] = {
+>>>>>>> main
     logger.info(s"Fetching customs office summaries from crdl-cache")
     val fetchResult = retryFor("Fetching customs office summaries") {
       case Upstream4xxResponse(_) => false
@@ -119,7 +146,11 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     } {
       httpClient
         .get(
+<<<<<<< CRDL-494
           url"${crdlCacheCustomsOfficesUrlV2}/summaries?pageNum=$pageNum&pageSize=$pageSize"
+=======
+          urlForCustomsOfficeSummaries(pageNum, pageSize, referenceNumber, countryCode, officeName)
+>>>>>>> main
         )
         .execute[PagedResult[CustomsOfficeSummary]](using
           throwOnFailure(readEitherOf[PagedResult[CustomsOfficeSummary]])
@@ -154,6 +185,28 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
           )
     }
     url"$url"
+  }
+
+  def fetchCustomsOfficeDetail(
+    referenceNumber: String
+  )(using hc: HeaderCarrier, ec: ExecutionContext): Future[Option[CustomsOffice]] = {
+    val urlString = s"$crdlCacheCustomsOfficesUrlV2/$referenceNumber"
+    logger.info(s"Fetching customs office detail for $referenceNumber from crdl-cache")
+    val fetchResult = retryFor(s"fetching customs office detail for $referenceNumber") {
+      case Upstream4xxResponse(_) => false
+      case Upstream5xxResponse(_) => true
+    } {
+      httpClient
+        .get(url"$urlString")
+        .execute[Option[CustomsOffice]]
+    }
+    fetchResult.failed.foreach(err =>
+      logger.error(
+        s"Retries exceeded while fetching customs office detail for $referenceNumber",
+        err
+      )
+    )
+    fetchResult
   }
 
   def fetchCustomsOffices(

@@ -20,21 +20,74 @@
 @import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
 @import uk.gov.hmrc.crdlcacheadminfrontend.utils.ViewUtils.*
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.controllers.routes.{CustomsOfficesController => OfficesRoutes}
 
 @this(
     layout: Layout,
     govukTable: GovukTable,
+    govukInput: GovukInput,
+    govukButton: GovukButton,
+    govukFieldset: GovukFieldset,
+    formHelper: FormWithCSRF,
     heading: Heading,
     link: Link,
     pagedResults: PagedResults
 )
 
-@(customsOfficesPagedResult: PagedResult[CustomsOfficeSummary])(implicit request: RequestHeader, messages: Messages)
+@(
+    customsOfficesPagedResult: PagedResult[CustomsOfficeSummary],
+    referenceNumber: Option[String] = None,
+    countryCode: Option[String] = None,
+    officeName: Option[String] = None
+)(implicit request: RequestHeader, messages: Messages)
+
+@searchInputs = {
+    @govukInput(Input(
+        id = "referenceNumber",
+        name = "referenceNumber",
+        value = referenceNumber,
+        classes = "govuk-input--width-20",
+        label = Label(content = Text(messages("customsOffices.viewOffices.search.referenceNumber")))
+    ))
+    @govukInput(Input(
+        id = "countryCode",
+        name = "countryCode",
+        value = countryCode,
+        classes = "govuk-input--width-20",
+        label = Label(content = Text(messages("customsOffices.viewOffices.search.countryCode")))
+    ))
+    @govukInput(Input(
+        id = "officeName",
+        name = "officeName",
+        value = officeName,
+        classes = "govuk-input--width-20",
+        label = Label(content = Text(messages("customsOffices.viewOffices.search.officeName")))
+    ))
+}
 
 @layout(pageTitle = Some(pageTitle(messages("customsOffices.viewOffices.pageTitle")))) {
     @heading(messages("customsOffices.viewOffices.pageTitle"))
-    
-    Search goes here
+
+    <div class="govuk-summary-card govuk-!-margin-bottom-6">
+        <div class="govuk-summary-card__title-wrapper">
+            <h2 class="govuk-summary-card__title">@messages("customsOffices.viewOffices.search.heading")</h2>
+        </div>
+        <div class="govuk-summary-card__content govuk-!-padding-4">
+            @formHelper(action = OfficesRoutes.viewOffices()) {
+                @govukFieldset(Fieldset(
+                    legend = Some(Legend(
+                        content = Text(messages("customsOffices.viewOffices.search.heading")),
+                        classes = "govuk-visually-hidden"
+                    )),
+                    html = searchInputs
+                ))
+                @govukButton(Button(
+                    content = Text(messages("customsOffices.viewOffices.search.button")),
+                    preventDoubleClick = Some(true)
+                ))
+            }
+        </div>
+    </div>
 
     @pagedResults(
         customsOfficesPagedResult,
@@ -55,7 +108,12 @@
                 TableRow(content = Text(c.customsOfficeUsualName)),
                 TableRow(content = HtmlContent(link(s"office-${c.referenceNumber}", messages("links.details"), officeDetailUrl(c.referenceNumber, c.phase, c.domain), Some(s"for customs office ${c.customsOfficeUsualName}"))))
             ))
-        ))
+        )),
+        additionalParams = Seq(
+            referenceNumber.map("referenceNumber" -> _),
+            countryCode.map("countryCode" -> _),
+            officeName.map("officeName" -> _)
+        ).flatten
     )
 }
 

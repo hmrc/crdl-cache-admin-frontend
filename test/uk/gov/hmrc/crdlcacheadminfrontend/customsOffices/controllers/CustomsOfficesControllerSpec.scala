@@ -98,10 +98,32 @@ class CustomsOfficesControllerSpec
     pageSize: Int = defaultPageSize
   ) =
     when(
-      crdlConnectorMock.fetchCustomsOfficeSummaries(eqTo(pageNum), eqTo(pageSize))(using
+      crdlConnectorMock.fetchCustomsOfficeSummaries(
+        eqTo(pageNum),
+        eqTo(pageSize),
         any(),
-        eqTo(ec)
-      )
+        any(),
+        any()
+      )(using any(), eqTo(ec))
+    )
+      .thenReturn(Future.successful(payload))
+
+  def stubCRDLConnector_FetchCustomsOfficeSummaries_Successful_WithFilters(
+    referenceNumber: Option[String],
+    countryCode: Option[String],
+    officeName: Option[String],
+    payload: PagedResult[CustomsOfficeSummary] = pagedCustomsOfficeSummaryResult,
+    pageNum: Int = defaultPageNum,
+    pageSize: Int = defaultPageSize
+  ) =
+    when(
+      crdlConnectorMock.fetchCustomsOfficeSummaries(
+        eqTo(pageNum),
+        eqTo(pageSize),
+        eqTo(referenceNumber),
+        eqTo(countryCode),
+        eqTo(officeName)
+      )(using any(), eqTo(ec))
     )
       .thenReturn(Future.successful(payload))
 
@@ -110,10 +132,13 @@ class CustomsOfficesControllerSpec
     pageSize: Int = defaultPageSize
   ) =
     when(
-      crdlConnectorMock.fetchCustomsOfficeSummaries(eqTo(pageNum), eqTo(pageSize))(using
+      crdlConnectorMock.fetchCustomsOfficeSummaries(
+        eqTo(pageNum),
+        eqTo(pageSize),
         any(),
-        eqTo(ec)
-      )
+        any(),
+        any()
+      )(using any(), eqTo(ec))
     )
       .thenReturn(
         Future.failed(
@@ -182,9 +207,30 @@ class CustomsOfficesControllerSpec
         )
       )
 
+  // ...fetchCustomsOfficeDetail
+  def stubCRDLConnector_FetchCustomsOfficeDetail_Successful(
+    referenceNumber: String = defaultReferenceNumber,
+    payload: Option[CustomsOffice] = Some(defaultCustomsOffice)
+  ) =
+    when(crdlConnectorMock.fetchCustomsOfficeDetail(eqTo(referenceNumber))(using any(), eqTo(ec)))
+      .thenReturn(Future.successful(payload))
+
+  def stubCRDLConnector_FetchCustomsOfficeDetail_ThrowsUpstreamErrorResponse(
+    referenceNumber: String = defaultReferenceNumber
+  ) =
+    when(crdlConnectorMock.fetchCustomsOfficeDetail(eqTo(referenceNumber))(using any(), eqTo(ec)))
+      .thenReturn(
+        Future.failed(UpstreamErrorResponse("Fetch office detail failed", INTERNAL_SERVER_ERROR))
+      )
+
   // Pages stubs behaviour
   def stubOfficesPage_Successful() =
-    when(officesPageMock(eqTo(pagedCustomsOfficeSummaryResult))(using any(), any()))
+    when(
+      officesPageMock(eqTo(pagedCustomsOfficeSummaryResult), any(), any(), any())(using
+        any(),
+        any()
+      )
+    )
       .thenReturn(HtmlFormat.empty)
   def stubOfficeDetailPage_Successful() =
     when(officeDetailsPageMock(any())(using any(), any()))
@@ -200,7 +246,10 @@ class CustomsOfficesControllerSpec
     stubCRDLConnector_FetchCustomsOfficeSummaries_Successful()
     stubOfficesPage_Successful()
 
-    val result = controller.viewOffices(Some(defaultPageNum), Some(defaultPageSize))(defaultRequest)
+    val result =
+      controller.viewOffices(Some(defaultPageNum), Some(defaultPageSize), None, None, None)(
+        defaultRequest
+      )
 
     status(result) shouldBe OK
     contentType(result) shouldBe Some(MimeTypes.HTML)
@@ -212,7 +261,11 @@ class CustomsOfficesControllerSpec
     stubOfficesPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.viewOffices(Some(defaultPageNum), Some(defaultPageSize))(defaultRequest))
+      await(
+        controller.viewOffices(Some(defaultPageNum), Some(defaultPageSize), None, None, None)(
+          defaultRequest
+        )
+      )
     }
   }
 
@@ -223,7 +276,11 @@ class CustomsOfficesControllerSpec
     stubOfficesPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.viewOffices(Some(defaultPageNum), Some(defaultPageSize))(defaultRequest))
+      await(
+        controller.viewOffices(Some(defaultPageNum), Some(defaultPageSize), None, None, None)(
+          defaultRequest
+        )
+      )
     }
   }
 
@@ -232,7 +289,10 @@ class CustomsOfficesControllerSpec
     stubCRDLConnector_FetchCustomsOfficeSummaries_Successful()
     stubOfficesPage_Successful()
 
-    val result = controller.viewOffices(Some(defaultPageNum), Some(defaultPageSize))(defaultRequest)
+    val result =
+      controller.viewOffices(Some(defaultPageNum), Some(defaultPageSize), None, None, None)(
+        defaultRequest
+      )
 
     status(result) shouldBe SEE_OTHER
     redirectLocation(result) shouldBe Some(
@@ -246,13 +306,17 @@ class CustomsOfficesControllerSpec
     stubOfficesPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.viewOffices(Some(defaultPageNum), Some(defaultPageSize))(defaultRequest))
+      await(
+        controller.viewOffices(Some(defaultPageNum), Some(defaultPageSize), None, None, None)(
+          defaultRequest
+        )
+      )
     }
   }
 
   "CustomsOfficesController.officeDetail" should "return 200 OK when there are no errors" in {
     stubAuth_Successful()
-    stubCRDLConnector_FetchCustomsOffices_Successful()
+    stubCRDLConnector_FetchCustomsOfficeDetail_Successful()
     stubOfficeDetailPage_Successful()
 
     val result = controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest)
@@ -273,9 +337,18 @@ class CustomsOfficesControllerSpec
     contentType(result) shouldBe Some(MimeTypes.HTML)
   }
 
+  it should "return 404 when the office is not found" in {
+    stubAuth_Successful()
+    stubCRDLConnector_FetchCustomsOfficeDetail_Successful(payload = None)
+
+    val result = controller.officeDetail(defaultReferenceNumber)(defaultRequest)
+
+    status(result) shouldBe NOT_FOUND
+  }
+
   it should "throws the returned error when internal-auth fails" in {
     stubAuth_ThrowsUpstreamErrorResponse()
-    stubCRDLConnector_FetchCustomsOffices_Successful()
+    stubCRDLConnector_FetchCustomsOfficeDetail_Successful()
     stubOfficeDetailPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
@@ -286,7 +359,7 @@ class CustomsOfficesControllerSpec
   // TODO: This test characterises the current behaviour, but we should supply a "Not authorized" page that tells the user they aren't authorised to use this frontend
   it should "throws the returned error when internal-auth determines that the user does not the required permissions" in {
     stubAuth_ThrowsUpstreamErrorResponse(FORBIDDEN)
-    stubCRDLConnector_FetchCustomsOffices_Successful()
+    stubCRDLConnector_FetchCustomsOfficeDetail_Successful()
     stubOfficeDetailPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
@@ -296,7 +369,7 @@ class CustomsOfficesControllerSpec
 
   it should "redirect the user to login when they are unauthorized" in {
     stubAuth_ThrowsUpstreamErrorResponse(UNAUTHORIZED)
-    stubCRDLConnector_FetchCustomsOffices_Successful()
+    stubCRDLConnector_FetchCustomsOfficeDetail_Successful()
     stubOfficeDetailPage_Successful()
 
     val result = controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest)
@@ -309,11 +382,139 @@ class CustomsOfficesControllerSpec
 
   it should "throws the returned error when the crdl cache call fails" in {
     stubAuth_Successful()
-    stubCRDLConnector_FetchCustomsOffices_ThrowsUpsteamErrorResponse()
+    stubCRDLConnector_FetchCustomsOfficeDetail_ThrowsUpstreamErrorResponse()
     stubOfficeDetailPage_Successful()
 
     assertThrows[UpstreamErrorResponse] {
       await(controller.officeDetail(defaultReferenceNumber, None, None)(defaultRequest))
+    }
+  }
+
+  "CustomsOfficesController.viewOffices (search)" should "return 200 OK and pass all search params to the connector when all fields are provided" in {
+    stubAuth_Successful()
+    stubCRDLConnector_FetchCustomsOfficeSummaries_Successful_WithFilters(
+      referenceNumber = Some("GB000001"),
+      countryCode = Some("GB"),
+      officeName = Some("Test Office")
+    )
+    stubOfficesPage_Successful()
+
+    val result = controller.viewOffices(
+      Some(defaultPageNum),
+      Some(defaultPageSize),
+      Some("GB000001"),
+      Some("GB"),
+      Some("Test Office")
+    )(defaultRequest)
+
+    status(result) shouldBe OK
+    contentType(result) shouldBe Some(MimeTypes.HTML)
+  }
+
+  it should "filter out empty string search params and pass None to the connector" in {
+    stubAuth_Successful()
+    stubCRDLConnector_FetchCustomsOfficeSummaries_Successful_WithFilters(
+      referenceNumber = None,
+      countryCode = None,
+      officeName = None
+    )
+    stubOfficesPage_Successful()
+
+    val result = controller.viewOffices(
+      Some(defaultPageNum),
+      Some(defaultPageSize),
+      Some(""),
+      Some(""),
+      Some("")
+    )(defaultRequest)
+
+    status(result) shouldBe OK
+    contentType(result) shouldBe Some(MimeTypes.HTML)
+  }
+
+  it should "pass only non-empty search params to the connector" in {
+    stubAuth_Successful()
+    stubCRDLConnector_FetchCustomsOfficeSummaries_Successful_WithFilters(
+      referenceNumber = Some("GB000001"),
+      countryCode = None,
+      officeName = None
+    )
+    stubOfficesPage_Successful()
+
+    val result = controller.viewOffices(
+      Some(defaultPageNum),
+      Some(defaultPageSize),
+      Some("GB000001"),
+      Some(""),
+      Some("")
+    )(defaultRequest)
+
+    status(result) shouldBe OK
+    contentType(result) shouldBe Some(MimeTypes.HTML)
+  }
+
+  it should "throws the returned error when internal-auth fails during a search" in {
+    stubAuth_ThrowsUpstreamErrorResponse()
+
+    assertThrows[UpstreamErrorResponse] {
+      await(
+        controller.viewOffices(
+          Some(defaultPageNum),
+          Some(defaultPageSize),
+          Some("GB000001"),
+          Some("GB"),
+          Some("Test Office")
+        )(defaultRequest)
+      )
+    }
+  }
+
+  // TODO: This test characterises the current behaviour, but we should supply a "Not authorized" page that tells the user they aren't authorised to use this frontend
+  it should "throws the returned error when internal-auth determines that the user does not have the required permissions during a search" in {
+    stubAuth_ThrowsUpstreamErrorResponse(FORBIDDEN)
+
+    assertThrows[UpstreamErrorResponse] {
+      await(
+        controller.viewOffices(
+          Some(defaultPageNum),
+          Some(defaultPageSize),
+          Some("GB000001"),
+          Some("GB"),
+          Some("Test Office")
+        )(defaultRequest)
+      )
+    }
+  }
+
+  it should "redirect the user to login when they are unauthorized during a search" in {
+    stubAuth_ThrowsUpstreamErrorResponse(UNAUTHORIZED)
+
+    val result = controller.viewOffices(
+      Some(defaultPageNum),
+      Some(defaultPageSize),
+      Some("GB000001"),
+      Some("GB"),
+      Some("Test Office")
+    )(defaultRequest)
+
+    status(result) shouldBe SEE_OTHER
+    redirectLocation(result) shouldBe Some(s"${expectedOfficesRedirectUrl}offices")
+  }
+
+  it should "throws the returned error when the connector call fails during a search" in {
+    stubAuth_Successful()
+    stubCRDLConnector_FetchCustomsOfficeSummaries_ThrowsUpsteamErrorResponse()
+
+    assertThrows[UpstreamErrorResponse] {
+      await(
+        controller.viewOffices(
+          Some(defaultPageNum),
+          Some(defaultPageSize),
+          Some("GB000001"),
+          Some("GB"),
+          Some("Test Office")
+        )(defaultRequest)
+      )
     }
   }
 }

@@ -34,6 +34,7 @@ import uk.gov.hmrc.crdlcacheadminfrontend.dataTraits.{
   CustomsOfficeSummaryTestData,
   CustomsOfficeTestData
 }
+import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.{CustomsOffice, CustomsOfficeDetail}
 
 class CRDLConnectorSpec
   extends AsyncFlatSpec
