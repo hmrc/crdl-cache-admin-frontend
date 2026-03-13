@@ -30,6 +30,8 @@ error.codelist.snapshot.notfound.text = No matching snapshot was found for the c
 
 ########## Paged Results
 pagedResults.totalItems = Total items: {0}
+pagedResults.page = Page: {0} of {1}
+pagedResults.results = Results: {0}-{1} of {2}
 pagedResults.none = No results found
 
 ########## CodeLists

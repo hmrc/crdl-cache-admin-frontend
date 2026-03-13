@@ -20,7 +20,8 @@
 
 @this(
     govukPagination: GovukPagination,
-    paragraph: Paragraph
+    paragraph: Paragraph,
+
 )
 
 @(
@@ -30,8 +31,21 @@
     additionalParams: Seq[(String, String)] = Seq.empty
 )(implicit messages: Messages)
 
-@if(pagedResult.items.length > 0) {
+@lower = @{
+    (pagedResult.pageNum - 1) * pagedResult.pageSize + 1
+}
+@higher = @{
+    (pagedResult.pageNum * pagedResult.pageSize).min(pagedResult.totalItems)
+}
+
+@summary = {
     @paragraph(messages("pagedResults.totalItems", pagedResult.totalItems))
+    @paragraph(messages("pagedResults.page", pagedResult.pageNum, pagedResult.totalPages))
+    @paragraph(messages("pagedResults.results", lower, higher, pagedResult.totalItems))
+}
+
+@if(pagedResult.items.length > 0) {
+    @summary
 
     @renderResults
 
