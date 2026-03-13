@@ -28,6 +28,10 @@ error.notfound = If you typed the web address, please check it is correct.
 error.codelist.snapshot.notfound.heading = Unable to load Code List {0}
 error.codelist.snapshot.notfound.text = No matching snapshot was found for the code list {0}. Unable to load code list data.
 
+########## Paged Results
+pagedResults.totalItems = Total items: {0}
+pagedResults.none = No results found
+
 ########## CodeLists
 codeLists.viewLists.pageTitle = Code Lists
 codeLists.viewLists.table.headings.code = List Code
