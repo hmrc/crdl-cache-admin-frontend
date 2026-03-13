@@ -30,9 +30,9 @@
     additionalParams: Seq[(String, String)] = Seq.empty
 )(implicit messages: Messages)
 
-@paragraph(messages("pagedResults.total", pagedResult.totalItems))
-
 @if(pagedResult.items.length > 0)
+    @paragraph(messages("pagedResults.total", pagedResult.totalItems))
+
     @renderResults
 
     @{
