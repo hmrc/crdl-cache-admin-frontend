@@ -25,5 +25,5 @@ case class CodeListEntry(
 )
 
 object CodeListEntry {
-  given Reads[CodeListEntry] = Json.reads[CodeListEntry]
+  given Format[CodeListEntry] = Json.format[CodeListEntry]
 }

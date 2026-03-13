@@ -20,22 +20,77 @@
 @import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
 @import uk.gov.hmrc.crdlcacheadminfrontend.utils.ViewUtils.*
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.controllers.routes.{CodeListsController => CodeListRoutes}
 
 @this(
     layout: Layout,
     govukTable: GovukTable,
+    govukInput: GovukInput,
+    govukButton: GovukButton,
+    govukFieldset: GovukFieldset,
+    formHelper: FormWithCSRF,
     heading: Heading,
     link: Link,
     pagedResults: PagedResults
 )
 
-@(snapshotsPageResult: PagedResult[CodeListSnapshot])(implicit request: RequestHeader, messages: Messages)
+@(
+    snapshotsPageResult: PagedResult[CodeListSnapshot],
+    codeListCode: Option[String] = None,
+    phase: Option[String] = None,
+    domain: Option[String] = None
+)(implicit request: RequestHeader, messages: Messages)
+
+@searchInputs = {
+    @govukInput(Input(
+        id = "codeListCode",
+        name = "codeListCode",
+        value = codeListCode,
+        classes = "govuk-input--width-20",
+        label = Label(content = Text(messages("codeLists.viewLists.search.codeListCode")))
+    ))
+    @govukInput(Input(
+        id = "phase",
+        name = "phase",
+        value = phase,
+        classes = "govuk-input--width-20",
+        label = Label(content = Text(messages("codeLists.viewLists.search.phase")))
+    ))
+    @govukInput(Input(
+        id = "domain",
+        name = "domain",
+        value = domain,
+        classes = "govuk-input--width-20",
+        label = Label(content = Text(messages("codeLists.viewLists.search.domain")))
+    ))
+}
 
 @layout(pageTitle = Some(pageTitle(messages("codeLists.viewLists.pageTitle")))) {
     @heading(messages("codeLists.viewLists.pageTitle"))
 
+    <div class="govuk-summary-card govuk-!-margin-bottom-6">
+        <div class="govuk-summary-card__title-wrapper">
+            <h2 class="govuk-summary-card__title">@messages("codeLists.viewLists.search.heading")</h2>
+        </div>
+        <div class="govuk-summary-card__content govuk-!-padding-4">
+            @formHelper(action = CodeListRoutes.viewLists()) {
+                @govukFieldset(Fieldset(
+                    legend = Some(Legend(
+                        content = Text(messages("codeLists.viewLists.search.heading")),
+                        classes = "govuk-visually-hidden"
+                    )),
+                    html = searchInputs
+                ))
+                @govukButton(Button(
+                    content = Text(messages("codeLists.viewLists.search.button")),
+                    preventDoubleClick = Some(true)
+                ))
+            }
+        </div>
+    </div>
+
     @pagedResults(
-      snapshotsPageResult,
+        snapshotsPageResult,
         govukTable(Table(
             head = Some(Seq(
                 HeadCell(content = Text(messages("codeLists.viewLists.table.headings.code"))),
@@ -53,8 +108,13 @@
                 TableRow(content = Text(s.phase.getOrElse("-"))),
                 TableRow(content = HtmlContent(link(s"details-${s.codeListCode}", messages("links.details"), listDetailUrl(s.codeListCode), Some(s"for code list ${s.codeListCode}"))))
             ))
-        ))
-      )
+        )),
+        additionalParams = Seq(
+            codeListCode.map("codeListCode" -> _),
+            phase.map("phase" -> _),
+            domain.map("domain" -> _)
+        ).flatten
+    )
 }
 
 @{

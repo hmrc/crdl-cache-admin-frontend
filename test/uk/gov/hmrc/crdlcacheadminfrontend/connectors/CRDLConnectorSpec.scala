@@ -419,4 +419,62 @@ class CRDLConnectorSpec
   it should "should Retry when a server error is returned from for fetchCodeListSnapShots" in {
     fetchCodeListSnapShotsTestRetry(serverError, true)
   }
+
+  it should "include codeListCode as a query param when provided" in {
+    stubFor(
+      get(urlPathEqualTo(codeListSnapShotsUrl))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("10"))
+        .withQueryParam("codeListCode", equalTo("BC08"))
+        .willReturn(ok().withBody(asJson(pagedCodeListSnapShotResult)))
+    )
+
+    connector
+      .fetchCodeListSnapShots(1, 10, codeListCode = Some("BC08"))
+      .map(_ mustBe pagedCodeListSnapShotResult)
+  }
+
+  it should "include phase as a query param when provided" in {
+    stubFor(
+      get(urlPathEqualTo(codeListSnapShotsUrl))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("10"))
+        .withQueryParam("phase", equalTo("P6"))
+        .willReturn(ok().withBody(asJson(pagedCodeListSnapShotResult)))
+    )
+
+    connector
+      .fetchCodeListSnapShots(1, 10, phase = Some("P6"))
+      .map(_ mustBe pagedCodeListSnapShotResult)
+  }
+
+  it should "include domain as a query param when provided" in {
+    stubFor(
+      get(urlPathEqualTo(codeListSnapShotsUrl))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("10"))
+        .withQueryParam("domain", equalTo("NCTS"))
+        .willReturn(ok().withBody(asJson(pagedCodeListSnapShotResult)))
+    )
+
+    connector
+      .fetchCodeListSnapShots(1, 10, domain = Some("NCTS"))
+      .map(_ mustBe pagedCodeListSnapShotResult)
+  }
+
+  it should "include all filter params as query params when all are provided" in {
+    stubFor(
+      get(urlPathEqualTo(codeListSnapShotsUrl))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("10"))
+        .withQueryParam("codeListCode", equalTo("CL251"))
+        .withQueryParam("phase", equalTo("P6"))
+        .withQueryParam("domain", equalTo("NCTS"))
+        .willReturn(ok().withBody(asJson(pagedCodeListSnapShotResult)))
+    )
+
+    connector
+      .fetchCodeListSnapShots(1, 10, Some("CL251"), Some("P6"), Some("NCTS"))
+      .map(_ mustBe pagedCodeListSnapShotResult)
+  }
 }

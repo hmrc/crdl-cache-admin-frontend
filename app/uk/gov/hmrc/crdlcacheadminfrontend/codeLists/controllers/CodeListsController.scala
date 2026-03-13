@@ -41,7 +41,14 @@ class CodeListsController @Inject (
 )(using ExecutionContext)
   extends FrontendController(mcc)
   with I18nSupport {
-  def viewLists(page: Option[Int], pageSize: Option[Int]): Action[AnyContent] =
+
+  def viewLists(
+    page: Option[Int],
+    pageSize: Option[Int],
+    codeListCode: Option[String],
+    phase: Option[String],
+    domain: Option[String]
+  ): Action[AnyContent] =
     auth
       .authorizedAction(
         continueUrl = routes.CodeListsController.viewLists(),
@@ -49,9 +56,22 @@ class CodeListsController @Inject (
       )
       .async { implicit request =>
         crdlConnector
-          .fetchCodeListSnapShots(page.getOrElse(1), pageSize.getOrElse(config.defaultPageSize))
+          .fetchCodeListSnapShots(
+            page.getOrElse(1),
+            pageSize.getOrElse(config.defaultPageSize),
+            codeListCode.filter(_.nonEmpty),
+            phase.filter(_.nonEmpty),
+            domain.filter(_.nonEmpty)
+          )
           .map { snapshots =>
-            Ok(listsPage(snapshots))
+            Ok(
+              listsPage(
+                snapshots,
+                codeListCode.filter(_.nonEmpty),
+                phase.filter(_.nonEmpty),
+                domain.filter(_.nonEmpty)
+              )
+            )
           }
       }
 
