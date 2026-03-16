@@ -54,13 +54,13 @@ final case class CustomsOffice(
 object CustomsOffice {
   given Format[CustomsOffice] = Json.format[CustomsOffice]
 
-  def toViewModel(value: CustomsOffice): CustomsOfficeViewModel = CustomsOfficeViewModel(
+  def toViewModel(value: CustomsOffice, phase: Option[String], domain: Option[String]): CustomsOfficeViewModel = CustomsOfficeViewModel(
     referenceNumber = value.referenceNumber,
     officeUsualName = value.customsOfficeLsd.customsOfficeUsualName,
     activeFrom = value.activeFrom,
     activeTo = value.activeTo,
-    phase = value.phase,
-    domain = value.domain,
+    phase = phase,
+    domain = domain,
     location = Location(
       city = value.customsOfficeLsd.city,
       country = value.countryCode,
