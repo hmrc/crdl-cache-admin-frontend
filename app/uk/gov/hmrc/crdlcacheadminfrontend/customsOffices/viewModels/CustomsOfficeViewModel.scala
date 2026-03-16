@@ -32,7 +32,9 @@ final case class CustomsOfficeViewModel(
   specificInfo: SpecificInfo,
   references: References,
   details: Details,
-  timetables: List[Timetable]
+  timetables: List[Timetable],
+  phase: Option[String],
+  domain: Option[String]
 )
 
 final case class Location(

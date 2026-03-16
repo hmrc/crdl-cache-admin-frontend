@@ -43,8 +43,8 @@
         rows = Seq(
             SummaryListRow(key = Key(Text(messages("codeLists.viewLists.table.headings.code"))), value = Value(Text(snapshot.codeListCode))),
             SummaryListRow(key = Key(Text(messages("codeLists.viewLists.table.headings.snapshot"))), value = Value(Text(snapshot.snapshotVersion.toString()))),
-            SummaryListRow(key = Key(Text(messages("codeLists.viewLists.table.headings.domain"))), value = Value(Text(snapshot.domain.getOrElse("-")))),
-            SummaryListRow(key = Key(Text(messages("codeLists.viewLists.table.headings.phase"))), value = Value(Text(snapshot.phase.getOrElse("-")))),
+            SummaryListRow(key = Key(Text(messages("codeLists.viewLists.table.headings.domain"))), value = Value(Text(optionOrDefault(snapshot.domain)))),
+            SummaryListRow(key = Key(Text(messages("codeLists.viewLists.table.headings.phase"))), value = Value(Text(optionOrDefault(snapshot.phase)))),
             SummaryListRow(key = Key(Text(messages("codeLists.viewLists.table.headings.updated"))), value = Value(Text(formatDateWithTime(snapshot.lastUpdated))))
         )
     ))
