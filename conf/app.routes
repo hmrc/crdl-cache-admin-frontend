@@ -7,7 +7,7 @@ GET         /                       uk.gov.hmrc.crdlcacheadminfrontend.controlle
 
 GET         /sign-in                uk.gov.hmrc.crdlcacheadminfrontend.auth.AuthController.signIn()
 
-GET         /lists                  uk.gov.hmrc.crdlcacheadminfrontend.codeLists.controllers.CodeListsController.viewLists(page: Option[Int] ?= None, pageSize: Option[Int] ?= None)
+GET         /lists                  uk.gov.hmrc.crdlcacheadminfrontend.codeLists.controllers.CodeListsController.viewLists(page: Option[Int] ?= None, pageSize: Option[Int] ?= None, codeListCode: Option[String] ?= None, phase: Option[String] ?= None, domain: Option[String] ?= None)
 GET         /lists/:code            uk.gov.hmrc.crdlcacheadminfrontend.codeLists.controllers.CodeListsController.listDetail(code: String, pageNum: Int, pageSize: Int)
 
 GET         /offices                uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.controllers.CustomsOfficesController.viewOffices(page: Option[Int] ?= None, pageSize: Option[Int] ?= None, referenceNumber: Option[String] ?= None, countryCode: Option[String] ?= None, officeName: Option[String] ?= None)

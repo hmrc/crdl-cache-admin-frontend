@@ -45,19 +45,37 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
   private val crdlCacheCodeListsUrlV2      = s"${config.crdlCacheUrl}/v2/lists"
   private val crdlCacheCustomsOfficesUrlV2 = s"${config.crdlCacheUrl}/v2/offices"
 
-  def fetchCodeListSnapShots(pageNum: Int, pageSize: Int)(using
-    hc: HeaderCarrier,
-    ex: ExecutionContext
-  ): Future[PagedResult[CodeListSnapshot]] = {
+  private def urlForCodeListSnapshots(
+    pageNum: Int,
+    pageSize: Int,
+    codeListCode: Option[String],
+    phase: Option[String],
+    domain: Option[String]
+  ): URL = {
+    val filterParams = Seq(
+      codeListCode.map(c => s"codeListCode=$c"),
+      phase.map(p => s"phase=$p"),
+      domain.map(d => s"domain=$d")
+    ).flatten
+    val allParams = (Seq(s"pageNum=$pageNum", s"pageSize=$pageSize") ++ filterParams).mkString("&")
+    val urlString = s"$crdlCacheCodeListsUrlV2?$allParams"
+    url"$urlString"
+  }
+
+  def fetchCodeListSnapShots(
+    pageNum: Int,
+    pageSize: Int,
+    codeListCode: Option[String] = None,
+    phase: Option[String] = None,
+    domain: Option[String] = None
+  )(using hc: HeaderCarrier, ec: ExecutionContext): Future[PagedResult[CodeListSnapshot]] = {
     logger.info(s"Fetching codelist snapshots from crdl-cache")
     val fetchResult = retryFor(s"fetch of codelist snapshots") {
-      // No point in retrying if our request is wrong
       case Upstream4xxResponse(_) => false
-      // Attempt to recover from intermittent connectivity issues
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-        .get(url"$crdlCacheCodeListsUrlV2?pageNum=$pageNum&pageSize=$pageSize")
+        .get(urlForCodeListSnapshots(pageNum, pageSize, codeListCode, phase, domain))
         .execute[PagedResult[CodeListSnapshot]](using
           throwOnFailure(readEitherOf[PagedResult[CodeListSnapshot]])
         )

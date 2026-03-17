@@ -101,63 +101,157 @@ class CodeListsControllerSpec
 
     // TODO: Decide what to do about lexical ordering as it will sort 1xx codes awkwardly
     val orderedSnapshots = List(BC08, BC108, BC36, BC66, CL190)
-
-    when(
-      crdlConnector.fetchCodeListSnapShots(eqTo(defaultPageNum), eqTo(defaultPageSize))(using
-        any(),
-        eqTo(ec)
-      )
-    ).thenReturn(
-      Future.successful(
-        PagedResult(
-          orderedSnapshots,
-          defaultPageNum,
-          defaultPageSize,
-          defaultItemsInPage,
-          defaultTotalItems,
-          defaultTotalPages
-        )
-      )
+    val pagedResult = PagedResult(
+      orderedSnapshots,
+      defaultPageNum,
+      defaultPageSize,
+      defaultItemsInPage,
+      defaultTotalItems,
+      defaultTotalPages
     )
 
     when(
-      listsPage(
-        eqTo(
-          PagedResult(
-            orderedSnapshots,
-            defaultPageNum,
-            defaultPageSize,
-            defaultItemsInPage,
-            defaultTotalItems,
-            defaultTotalPages
-          )
-        )
-      )(using any(), any())
+      crdlConnector.fetchCodeListSnapShots(
+        eqTo(defaultPageNum),
+        eqTo(defaultPageSize),
+        eqTo(None),
+        eqTo(None),
+        eqTo(None)
+      )(using
+        any(),
+        eqTo(ec)
+      )
+    ).thenReturn(Future.successful(pagedResult))
+
+    when(
+      listsPage(eqTo(pagedResult), eqTo(None), eqTo(None), eqTo(None))(using any(), any())
     ).thenReturn(HtmlFormat.empty)
 
     val request = FakeRequest().withSession("authToken" -> authToken)
-    val result  = controller.viewLists(Some(defaultPageNum), Some(defaultPageSize))(request)
+    val result =
+      controller.viewLists(Some(defaultPageNum), Some(defaultPageSize), None, None, None)(request)
 
     status(result) shouldBe OK
     contentType(result) shouldBe Some(MimeTypes.HTML)
+  }
+
+  it should "pass codeListCode filter to the connector and view" in {
+    when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
+      .thenReturn(Future.unit)
+
+    val pagedResult = PagedResult(List(BC08), defaultPageNum, defaultPageSize, 1, 1, 1)
+
+    when(
+      crdlConnector.fetchCodeListSnapShots(
+        eqTo(defaultPageNum),
+        eqTo(defaultPageSize),
+        eqTo(Some("BC08")),
+        eqTo(None),
+        eqTo(None)
+      )(using
+        any(),
+        eqTo(ec)
+      )
+    ).thenReturn(Future.successful(pagedResult))
+
+    when(
+      listsPage(eqTo(pagedResult), eqTo(Some("BC08")), eqTo(None), eqTo(None))(using any(), any())
+    ).thenReturn(HtmlFormat.empty)
+
+    val request = FakeRequest().withSession("authToken" -> authToken)
+    val result =
+      controller.viewLists(Some(defaultPageNum), Some(defaultPageSize), Some("BC08"), None, None)(
+        request
+      )
+
+    status(result) shouldBe OK
+    contentType(result) shouldBe Some(MimeTypes.HTML)
+  }
+
+  it should "pass phase and domain filters to the connector and view" in {
+    when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
+      .thenReturn(Future.unit)
+
+    val pagedResult = PagedResult(List(CL190), defaultPageNum, defaultPageSize, 1, 1, 1)
+
+    when(
+      crdlConnector.fetchCodeListSnapShots(
+        eqTo(defaultPageNum),
+        eqTo(defaultPageSize),
+        eqTo(None),
+        eqTo(Some("P6")),
+        eqTo(Some("NCTS"))
+      )(using
+        any(),
+        eqTo(ec)
+      )
+    ).thenReturn(Future.successful(pagedResult))
+
+    when(
+      listsPage(eqTo(pagedResult), eqTo(None), eqTo(Some("P6")), eqTo(Some("NCTS")))(using
+        any(),
+        any()
+      )
+    ).thenReturn(HtmlFormat.empty)
+
+    val request = FakeRequest().withSession("authToken" -> authToken)
+    val result = controller.viewLists(
+      Some(defaultPageNum),
+      Some(defaultPageSize),
+      None,
+      Some("P6"),
+      Some("NCTS")
+    )(request)
+
+    status(result) shouldBe OK
+    contentType(result) shouldBe Some(MimeTypes.HTML)
+  }
+
+  it should "treat empty string filter values as absent (None)" in {
+    when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
+      .thenReturn(Future.unit)
+
+    val pagedResult = PagedResult(List(BC08), defaultPageNum, defaultPageSize, 1, 1, 1)
+
+    when(
+      crdlConnector.fetchCodeListSnapShots(
+        eqTo(defaultPageNum),
+        eqTo(defaultPageSize),
+        eqTo(None),
+        eqTo(None),
+        eqTo(None)
+      )(using
+        any(),
+        eqTo(ec)
+      )
+    ).thenReturn(Future.successful(pagedResult))
+
+    when(
+      listsPage(eqTo(pagedResult), eqTo(None), eqTo(None), eqTo(None))(using any(), any())
+    ).thenReturn(HtmlFormat.empty)
+
+    val request = FakeRequest().withSession("authToken" -> authToken)
+    val result = controller.viewLists(
+      Some(defaultPageNum),
+      Some(defaultPageSize),
+      Some(""),
+      Some(""),
+      Some("")
+    )(request)
+
+    status(result) shouldBe OK
   }
 
   it should "throw errors returned when calling internal-auth to the top level error handler" in {
     when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
       .thenReturn(Future.failed(UpstreamErrorResponse("Oh no!", INTERNAL_SERVER_ERROR)))
 
-    when(
-      crdlConnector.fetchCodeListSnapShots(eqTo(defaultPageNum), eqTo(defaultPageSize))(using
-        any(),
-        eqTo(ec)
-      )
-    )
-      .thenReturn(Future.successful(List.empty))
-
     val request = FakeRequest().withSession("authToken" -> authToken)
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.viewLists(Some(defaultPageNum), Some(defaultPageSize))(request))
+      await(
+        controller.viewLists(Some(defaultPageNum), Some(defaultPageSize), None, None, None)(request)
+      )
     }
   }
 
@@ -166,7 +260,13 @@ class CodeListsControllerSpec
       .thenReturn(Future.unit)
 
     when(
-      crdlConnector.fetchCodeListSnapShots(eqTo(defaultPageNum), eqTo(defaultPageSize))(using
+      crdlConnector.fetchCodeListSnapShots(
+        eqTo(defaultPageNum),
+        eqTo(defaultPageSize),
+        eqTo(None),
+        eqTo(None),
+        eqTo(None)
+      )(using
         any(),
         eqTo(ec)
       )
@@ -176,7 +276,9 @@ class CodeListsControllerSpec
     val request = FakeRequest().withSession("authToken" -> authToken)
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.viewLists(Some(defaultPageNum), Some(defaultPageSize))(request))
+      await(
+        controller.viewLists(Some(defaultPageNum), Some(defaultPageSize), None, None, None)(request)
+      )
     }
   }
 
@@ -184,16 +286,9 @@ class CodeListsControllerSpec
     when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
       .thenReturn(Future.failed(UpstreamErrorResponse("Unauthorized", UNAUTHORIZED)))
 
-    when(
-      crdlConnector.fetchCodeListSnapShots(eqTo(defaultPageNum), eqTo(defaultPageSize))(using
-        any(),
-        eqTo(ec)
-      )
-    )
-      .thenReturn(Future.successful(List.empty))
-
     val request = FakeRequest().withSession("authToken" -> authToken)
-    val result  = controller.viewLists(Some(defaultPageNum), Some(defaultPageSize))(request)
+    val result =
+      controller.viewLists(Some(defaultPageNum), Some(defaultPageSize), None, None, None)(request)
 
     status(result) shouldBe SEE_OTHER
     redirectLocation(result) shouldBe Some(
@@ -206,18 +301,12 @@ class CodeListsControllerSpec
     when(authStub.stubAuth(predicate = Some(Permissions.read), retrieval = EmptyRetrieval))
       .thenReturn(Future.failed(UpstreamErrorResponse("Forbidden", FORBIDDEN)))
 
-    when(
-      crdlConnector.fetchCodeListSnapShots(eqTo(defaultPageNum), eqTo(defaultPageSize))(using
-        any(),
-        eqTo(ec)
-      )
-    )
-      .thenReturn(Future.successful(List.empty))
-
     val request = FakeRequest().withSession("authToken" -> authToken)
 
     assertThrows[UpstreamErrorResponse] {
-      await(controller.viewLists(Some(defaultPageNum), Some(defaultPageSize))(request))
+      await(
+        controller.viewLists(Some(defaultPageNum), Some(defaultPageSize), None, None, None)(request)
+      )
     }
   }
 }

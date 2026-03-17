@@ -41,6 +41,11 @@ codeLists.listDetail.properties.heading = Properties
 codeLists.listDetail.table.headings.key = Key
 codeLists.listDetail.table.headings.value = Value
 codeLists.listDetail.table.headings.properties = Properties
+codeLists.viewLists.search.heading = Search
+codeLists.viewLists.search.codeListCode = Code List Code
+codeLists.viewLists.search.phase = Phase
+codeLists.viewLists.search.domain = Domain
+codeLists.viewLists.search.button = Search
 
 ########## Customs Offices
 customsOffices.viewOffices.pageTitle = Customs Offices
