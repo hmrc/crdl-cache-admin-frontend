@@ -1,0 +1,32 @@
+[
+  {
+    "key": "ZU",
+    "value": "Intermediate bulk container, flexible",
+    "properties": {"state":  "valid"}
+  },
+  {
+    "key": "ZV",
+    "value": "Intermediate bulk container, metal, other than steel",
+    "properties": {"state":  "valid"}
+  },
+  {
+    "key": "ZW",
+    "value": "Intermediate bulk container, natural wood",
+    "properties": {"state":  "valid"}
+  },
+  {
+    "key": "ZX",
+    "value": "Intermediate bulk container, plywood",
+    "properties": {"state":  "valid"}
+  },
+  {
+    "key": "ZY",
+    "value": "Intermediate bulk container, reconstituted wood",
+    "properties": {"state":  "valid"}
+  },
+  {
+    "key": "ZZ",
+    "value": "Mutually defined",
+    "properties": {"state":  "valid"}
+  }
+]
