@@ -20,13 +20,14 @@ import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.crdlcacheadminfrontend.auth.Permissions
+import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.CodeListEntry
 import uk.gov.hmrc.crdlcacheadminfrontend.connectors.CRDLConnector
 import uk.gov.hmrc.crdlcacheadminfrontend.views.html.NotFound
 import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.views.html.{ListDetail, Lists}
 import uk.gov.hmrc.crdlcacheadminfrontend.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.internalauth.client.FrontendAuthComponents
 
 @Singleton
@@ -75,32 +76,30 @@ class CodeListsController @Inject (
           }
       }
 
-  def listDetail(code: String, pageNum: Int, pageSize: Int): Action[AnyContent] =
+  def listDetail(code: String): Action[AnyContent] =
     auth
       .authorizedAction(
-        continueUrl = routes.CodeListsController.listDetail(code, pageNum, pageSize),
+        continueUrl = routes.CodeListsController.listDetail(code),
         predicate = Permissions.read
       )
       .async { implicit request =>
-        val messages        = request.messages
-        val codeListsFuture = crdlConnector.fetchCodeList(code)
-        val snapshotsFuture = crdlConnector.fetchCodeListSnapShots(pageNum, pageSize)
+        val messages = request.messages
         for {
-          codeLists <- codeListsFuture
-          snapshots <- snapshotsFuture
+          snapshots <- crdlConnector.fetchCodeListSnapShot(code)
+          codeLists <- snapshots.fold(Future.successful(List.empty[CodeListEntry]))(s =>
+            crdlConnector.fetchCodeList(code, phase = s.phase, domain = s.domain)
+          )
         } yield {
-          snapshots.items
-            .find(s => s.codeListCode == code)
-            .fold {
-              Ok(
-                notFoundPage(
-                  messages("error.codelist.snapshot.notfound.heading", code),
-                  messages("error.codelist.snapshot.notfound.text", code)
-                )
+          snapshots.fold {
+            Ok(
+              notFoundPage(
+                messages("error.codelist.snapshot.notfound.heading", code),
+                messages("error.codelist.snapshot.notfound.text", code)
               )
-            } { snapshot =>
-              Ok(listDetailsPage(code, snapshot, codeLists))
-            }
+            )
+          } { snapshot =>
+            Ok(listDetailsPage(code, snapshot, codeLists))
+          }
         }
       }
 }

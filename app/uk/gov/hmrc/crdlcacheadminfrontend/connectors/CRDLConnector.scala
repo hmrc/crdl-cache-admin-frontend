@@ -41,9 +41,10 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
 
   override protected def configuration: Config = config.config.underlying
 
-  private val crdlCacheCodeListsUrl        = s"${config.crdlCacheUrl}/lists"
-  private val crdlCacheCodeListsUrlV2      = s"${config.crdlCacheUrl}/v2/lists"
-  private val crdlCacheCustomsOfficesUrlV2 = s"${config.crdlCacheUrl}/v2/offices"
+  private val crdlCacheCodeListsUrl           = s"${config.crdlCacheUrl}/lists"
+  private val crdlCacheCodeListsUrlV2         = s"${config.crdlCacheUrl}/v2/lists"
+  private val crdlCacheCodeListsSnapshotUrlV2 = s"${config.crdlCacheUrl}/v2/snapshot"
+  private val crdlCacheCustomsOfficesUrlV2    = s"${config.crdlCacheUrl}/v2/offices"
 
   private def urlForCodeListSnapshots(
     pageNum: Int,
@@ -86,26 +87,51 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     fetchResult
   }
 
+  def fetchCodeListSnapShot(
+    code: String
+  )(using hc: HeaderCarrier, ec: ExecutionContext): Future[Option[CodeListSnapshot]] = {
+    logger.info(s"Fetching codelist snapshots from crdl-cache")
+    val fetchResult = retryFor(s"fetch of codelist snapshots") {
+      case Upstream4xxResponse(_) => false
+      case Upstream5xxResponse(_) => true
+    } {
+      httpClient
+        .get(url"$crdlCacheCodeListsSnapshotUrlV2/$code")
+        .execute[Option[CodeListSnapshot]](using
+          throwOnFailure(readEitherOf[Option[CodeListSnapshot]])
+        )
+    }
+    fetchResult.failed.foreach(err =>
+      logger.error("Retries exceeded while fetching code list snapshots", err)
+    )
+    fetchResult
+  }
+
   private def urlForCodeList(
     code: String,
     filterKeys: Option[Set[String]],
-    filterProperties: Option[Map[String, Any]]
-  ): URL =
-    (filterKeys, filterProperties) match {
-      case (Some(keys), Some(properties)) =>
-        url"$crdlCacheCodeListsUrl/${code}?keys=${keys.mkString(",")}&$properties"
-      case (Some(keys), None) =>
-        url"$crdlCacheCodeListsUrl/${code}?keys=${keys.mkString(",")}"
-      case (None, Some(properties)) =>
-        url"$crdlCacheCodeListsUrl/${code}?$properties"
-      case (None, None) =>
-        url"$crdlCacheCodeListsUrl/${code}"
-    }
+    filterProperties: Option[Map[String, Any]],
+    phase: Option[String],
+    domain: Option[String]
+  ): URL = {
+    val allParams = Seq(
+      filterKeys.map(fK => s"keys=${fK.mkString(",")}"),
+      filterProperties.map(fP => fP.map { case (key, value) => s"$key=$value" }.mkString("&")),
+      phase.map(p => s"phase=$p"),
+      domain.map(d => s"domain=$d")
+    ).flatten.mkString("&")
+    val urlString =
+      if (allParams.isEmpty) s"$crdlCacheCodeListsUrl/$code"
+      else s"$crdlCacheCodeListsUrl/$code?$allParams"
+    url"$urlString"
+  }
 
   def fetchCodeList(
     code: String,
     filterKeys: Option[Set[String]] = None,
-    filterProperties: Option[Map[String, Any]] = None
+    filterProperties: Option[Map[String, Any]] = None,
+    phase: Option[String] = None,
+    domain: Option[String] = None
   )(using hc: HeaderCarrier, ec: ExecutionContext): Future[List[CodeListEntry]] = {
     logger.info(s"Fetching ${code} codelist from crdl-cache")
     val fetchResult = retryFor(s"fetch of codelist entries for ${code}") {
@@ -113,7 +139,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-        .get(urlForCodeList(code, filterKeys, filterProperties))
+        .get(urlForCodeList(code, filterKeys, filterProperties, phase, domain))
         .execute[List[CodeListEntry]](using throwOnFailure(readEitherOf[List[CodeListEntry]]))
     }
     fetchResult.failed.foreach(err =>

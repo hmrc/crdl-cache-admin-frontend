@@ -195,6 +195,51 @@ class CRDLConnectorSpec
       }
   }
 
+  it should "fetch codelist entries when filtering by phase and domain" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/lists/CL017"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .withQueryParam("phase", equalTo("P6"))
+        .withQueryParam("domain", equalTo("NCTS"))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("codelist/CL017.json")
+        )
+    )
+
+    val expected = List(
+      CodeListEntry("ZU", "Intermediate bulk container, flexible", Json.obj("state" -> "valid")),
+      CodeListEntry(
+        "ZV",
+        "Intermediate bulk container, metal, other than steel",
+        Json.obj("state" -> "valid")
+      ),
+      CodeListEntry(
+        "ZW",
+        "Intermediate bulk container, natural wood",
+        Json.obj("state" -> "valid")
+      ),
+      CodeListEntry("ZX", "Intermediate bulk container, plywood", Json.obj("state" -> "valid")),
+      CodeListEntry(
+        "ZY",
+        "Intermediate bulk container, reconstituted wood",
+        Json.obj("state" -> "valid")
+      ),
+      CodeListEntry("ZZ", "Mutually defined", Json.obj("state" -> "valid"))
+    )
+
+    crdlConnector
+      .fetchCodeList(
+        "CL017",
+        phase = Some("P6"),
+        domain = Some("NCTS")
+      )
+      .map {
+        _ shouldBe expected
+      }
+  }
+
   it should "throw UpstreamErrorResponse when crdl-cache returns a client error" in {
     stubFor(
       get(urlPathEqualTo("/crdl-cache/lists/BC999"))
