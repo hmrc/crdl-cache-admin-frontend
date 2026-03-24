@@ -30,7 +30,6 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import java.net.URL
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import java.time.Instant
 import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
 
 @Singleton
@@ -39,12 +38,13 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
 ) extends Retries
   with Logging {
   override protected def actorSystem: ActorSystem = system
-  override protected def configuration: Config    = config.config.underlying
 
-  private val crdlCacheCodeListsUrl        = s"${config.crdlCacheUrl}/lists"
-  private val crdlCacheCodeListsUrlV2      = s"${config.crdlCacheUrl}/v2/lists"
-  private val crdlCacheCustomsOfficesUrl   = s"${config.crdlCacheUrl}/offices"
-  private val crdlCacheCustomsOfficesUrlV2 = s"${config.crdlCacheUrl}/v2/offices"
+  override protected def configuration: Config = config.config.underlying
+
+  private val crdlCacheCodeListsUrl           = s"${config.crdlCacheUrl}/lists"
+  private val crdlCacheCodeListsUrlV2         = s"${config.crdlCacheUrl}/v2/lists"
+  private val crdlCacheCodeListsSnapshotUrlV2 = s"${config.crdlCacheUrl}/v2/snapshot"
+  private val crdlCacheCustomsOfficesUrlV2    = s"${config.crdlCacheUrl}/v2/offices"
 
   private def urlForCodeListSnapshots(
     pageNum: Int,
@@ -87,26 +87,51 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     fetchResult
   }
 
+  def fetchCodeListSnapShot(
+    code: String
+  )(using hc: HeaderCarrier, ec: ExecutionContext): Future[Option[CodeListSnapshot]] = {
+    logger.info(s"Fetching codelist snapshots from crdl-cache")
+    val fetchResult = retryFor(s"fetch of codelist snapshots") {
+      case Upstream4xxResponse(_) => false
+      case Upstream5xxResponse(_) => true
+    } {
+      httpClient
+        .get(url"$crdlCacheCodeListsSnapshotUrlV2/$code")
+        .execute[Option[CodeListSnapshot]](using
+          throwOnFailure(readEitherOf[Option[CodeListSnapshot]])
+        )
+    }
+    fetchResult.failed.foreach(err =>
+      logger.error("Retries exceeded while fetching code list snapshots", err)
+    )
+    fetchResult
+  }
+
   private def urlForCodeList(
     code: String,
     filterKeys: Option[Set[String]],
-    filterProperties: Option[Map[String, Any]]
-  ): URL =
-    (filterKeys, filterProperties) match {
-      case (Some(keys), Some(properties)) =>
-        url"$crdlCacheCodeListsUrl/${code}?keys=${keys.mkString(",")}&$properties"
-      case (Some(keys), None) =>
-        url"$crdlCacheCodeListsUrl/${code}?keys=${keys.mkString(",")}"
-      case (None, Some(properties)) =>
-        url"$crdlCacheCodeListsUrl/${code}?$properties"
-      case (None, None) =>
-        url"$crdlCacheCodeListsUrl/${code}"
-    }
+    filterProperties: Option[Map[String, Any]],
+    phase: Option[String],
+    domain: Option[String]
+  ): URL = {
+    val allParams = Seq(
+      filterKeys.map(fK => s"keys=${fK.mkString(",")}"),
+      filterProperties.map(fP => fP.map { case (key, value) => s"$key=$value" }.mkString("&")),
+      phase.map(p => s"phase=$p"),
+      domain.map(d => s"domain=$d")
+    ).flatten.mkString("&")
+    val urlString =
+      if (allParams.isEmpty) s"$crdlCacheCodeListsUrl/$code"
+      else s"$crdlCacheCodeListsUrl/$code?$allParams"
+    url"$urlString"
+  }
 
   def fetchCodeList(
     code: String,
     filterKeys: Option[Set[String]] = None,
-    filterProperties: Option[Map[String, Any]] = None
+    filterProperties: Option[Map[String, Any]] = None,
+    phase: Option[String] = None,
+    domain: Option[String] = None
   )(using hc: HeaderCarrier, ec: ExecutionContext): Future[List[CodeListEntry]] = {
     logger.info(s"Fetching ${code} codelist from crdl-cache")
     val fetchResult = retryFor(s"fetch of codelist entries for ${code}") {
@@ -114,7 +139,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-        .get(urlForCodeList(code, filterKeys, filterProperties))
+        .get(urlForCodeList(code, filterKeys, filterProperties, phase, domain))
         .execute[List[CodeListEntry]](using throwOnFailure(readEitherOf[List[CodeListEntry]]))
     }
     fetchResult.failed.foreach(err =>
@@ -135,7 +160,8 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       countryCode.map(c => s"countryCode=$c"),
       officeName.map(n => s"officeName=$n")
     ).flatten
-    val allParams = (Seq(s"pageNum=$pageNum", s"pageSize=$pageSize") ++ filterParams).mkString("&")
+    val allParams =
+      (Seq(s"pageNum=$pageNum", s"pageSize=$pageSize") ++ filterParams).mkString("&")
     val urlString = s"$crdlCacheCustomsOfficesUrlV2/summaries?$allParams"
     url"$urlString"
   }
@@ -166,27 +192,6 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     fetchResult
   }
 
-  private def urlForCustomsOffices(
-    referenceNumbers: Option[Set[String]],
-    countryCodes: Option[Set[String]],
-    roles: Option[Set[String]],
-    activeAt: Option[Instant]
-  ): URL = {
-    val url = (referenceNumbers, countryCodes, roles, activeAt) match {
-      case (None, None, None, None) => crdlCacheCustomsOfficesUrl
-      case _ =>
-        crdlCacheCustomsOfficesUrl
-          .concat(
-            Seq(
-              referenceNumbers.fold("")(r => s"referenceNumbers=${r.mkString(",")}"),
-              countryCodes.fold("")(c => s"countryCodes=${c.mkString(",")}"),
-              roles.fold("")(r => s"roles=${r.mkString(",")}")
-            ).filterNot(_.isEmpty).mkString("?", "&", "")
-          )
-    }
-    url"$url"
-  }
-
   def fetchCustomsOfficeDetail(
     referenceNumber: String
   )(using hc: HeaderCarrier, ec: ExecutionContext): Future[Option[CustomsOffice]] = {
@@ -205,33 +210,6 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
         s"Retries exceeded while fetching customs office detail for $referenceNumber",
         err
       )
-    )
-    fetchResult
-  }
-
-  def fetchCustomsOffices(
-    referenceNumbers: Option[Set[String]] = None,
-    countryCodes: Option[Set[String]] = None,
-    roles: Option[Set[String]] = None,
-    activeAt: Option[Instant] = None
-  )(using hc: HeaderCarrier, ec: ExecutionContext): Future[List[CustomsOffice]] = {
-    logger.info(s"Fetching customs offices from crdl-cache")
-    val fetchResult = retryFor(
-      referenceNumbers.fold(s"fetching all customs offices")(r =>
-        s"fetching customs offices for ${r.mkString(",")}"
-      )
-    ) {
-      case Upstream4xxResponse(_) => false
-      case Upstream5xxResponse(_) => true
-    } {
-      httpClient
-        .get(
-          urlForCustomsOffices(referenceNumbers = referenceNumbers, countryCodes, roles, activeAt)
-        )
-        .execute[List[CustomsOffice]](using throwOnFailure(readEitherOf[List[CustomsOffice]]))
-    }
-    fetchResult.failed.foreach(err =>
-      logger.error(s"Retries exceeded while fetching customs offices", err)
     )
     fetchResult
   }

@@ -273,24 +273,28 @@ class CRDLConnectorSpec
 
   private val officeDetailJson =
     """{
-          |  "referenceNumber": "GB000001",
-          |  "countryCode": "GB",
-          |  "postalCode": "SW1A 1AA",
-          |  "traderDedicated": false,
-          |  "customsOfficeSpecificNotesCodes": [],
-          |  "customsOfficeLsd": {
-          |    "customsOfficeUsualName": "London Office",
-          |    "languageCode": "EN",
-          |    "city": "London",
-          |    "prefixSuffixFlag": false,
-          |    "spaceToAdd": false,
-          |    "streetAndNumber": "1 Test Street"
-          |  },
-          |  "customsOfficeTimetable": []
-          |}""".stripMargin
+      |  "referenceNumber": "GB000001",
+      |  "phase": "P6",
+      |  "domain": "NCTS",
+      |  "countryCode": "GB",
+      |  "postalCode": "SW1A 1AA",
+      |  "traderDedicated": false,
+      |  "customsOfficeSpecificNotesCodes": [],
+      |  "customsOfficeLsd": {
+      |    "customsOfficeUsualName": "London Office",
+      |    "languageCode": "EN",
+      |    "city": "London",
+      |    "prefixSuffixFlag": false,
+      |    "spaceToAdd": false,
+      |    "streetAndNumber": "1 Test Street"
+      |  },
+      |  "customsOfficeTimetable": []
+      |}""".stripMargin
 
   private val expectedOfficeDetail = CustomsOffice(
     referenceNumber = "GB000001",
+    phase = Some("P6"),
+    domain = Some("NCTS"),
     activeFrom = None,
     activeTo = None,
     referenceNumberMainOffice = None,

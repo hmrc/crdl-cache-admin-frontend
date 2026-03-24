@@ -36,7 +36,9 @@
             SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.ref"))), value = Value(Text(customsOffice.referenceNumber))),
             SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.name"))), value = Value(Text(customsOffice.officeUsualName))),
             SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.activeFrom"))), value = Value(Text(valueOrDefault(formatDateWithTime(customsOffice.activeFrom))))),
-            SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.activeTo"))), value = Value(Text(valueOrDefault(formatDateWithTime(customsOffice.activeTo)))))
+            SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.keys.activeTo"))), value = Value(Text(valueOrDefault(formatDateWithTime(customsOffice.activeTo))))),
+            SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.phase"))), value = Value(Text(optionOrDefault(customsOffice.phase)))),
+            SummaryListRow(key = Key(Text(messages("customsOffices.officeDetails.summary.specific.keys.domain"))), value = Value(Text(optionOrDefault(customsOffice.domain))))
         )
     ))
     <ul class="govuk-list">

@@ -52,12 +52,11 @@ class CustomsOfficesControllerSpec
   with BeforeAndAfterEach
   with CustomsOfficeSummaryTestData
   with CustomsOfficeTestData {
-  private val defaultPageNum            = 1
-  private val defaultPageSize           = 10
-  private val defaultReferenceNumber    = "TestRef"
-  private val defaultReferenceNumberSet = Some(Set(defaultReferenceNumber))
-  private val defaultAuthToken          = UUID.randomUUID().toString
-  private val defaultRequest            = FakeRequest().withSession("authToken" -> defaultAuthToken)
+  private val defaultPageNum         = 1
+  private val defaultPageSize        = 10
+  private val defaultReferenceNumber = "TestRef"
+  private val defaultAuthToken       = UUID.randomUUID().toString
+  private val defaultRequest         = FakeRequest().withSession("authToken" -> defaultAuthToken)
   private val expectedOfficesRedirectUrl =
     "/internal-auth-frontend/sign-in?continue_url=%2Fcrdl-cache-admin-frontend%2F"
 
@@ -137,34 +136,6 @@ class CustomsOfficesControllerSpec
         any(),
         any()
       )(using any(), eqTo(ec))
-    )
-      .thenReturn(
-        Future.failed(
-          UpstreamErrorResponse("Customs office summaries called failed", INTERNAL_SERVER_ERROR)
-        )
-      )
-
-  // ...fetchCustomsOffices
-  def stubCRDLConnector_FetchCustomsOffices_Successful(
-    payload: List[CustomsOffice] = defaultCustomsOfficeList,
-    referenceNumbers: Option[Set[String]] = defaultReferenceNumberSet
-  ) =
-    when(
-      crdlConnectorMock.fetchCustomsOffices(eqTo(referenceNumbers), any(), any(), any())(using
-        any(),
-        eqTo(ec)
-      )
-    )
-      .thenReturn(Future.successful(payload))
-
-  def stubCRDLConnector_FetchCustomsOffices_ThrowsUpsteamErrorResponse(
-    referenceNumbers: Option[Set[String]] = defaultReferenceNumberSet
-  ) =
-    when(
-      crdlConnectorMock.fetchCustomsOffices(eqTo(referenceNumbers), any(), any(), any())(using
-        any(),
-        eqTo(ec)
-      )
     )
       .thenReturn(
         Future.failed(

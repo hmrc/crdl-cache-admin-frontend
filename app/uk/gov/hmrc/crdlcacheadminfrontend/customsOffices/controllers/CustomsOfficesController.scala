@@ -72,7 +72,11 @@ class CustomsOfficesController @Inject (
           )
       }
 
-  def officeDetail(referenceNumber: String) =
+  def officeDetail(
+    referenceNumber: String,
+    phase: Option[String] = None,
+    domain: Option[String] = None
+  ) =
     auth
       .authorizedAction(
         continueUrl = routes.CustomsOfficesController.viewOffices(),
@@ -82,8 +86,9 @@ class CustomsOfficesController @Inject (
         crdlConnector
           .fetchCustomsOfficeDetail(referenceNumber)
           .map {
-            case Some(office) => Ok(officeDetailsPage(CustomsOffice.toViewModel(office)))
-            case None         => NotFound
+            case Some(office) =>
+              Ok(officeDetailsPage(CustomsOffice.toViewModel(office, phase, domain)))
+            case None => NotFound
           }
       }
 }
