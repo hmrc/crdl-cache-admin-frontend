@@ -22,16 +22,21 @@
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
 @this(
   appConfig: AppConfig,
-  hmrcStandardPage: HmrcStandardPage
+  hmrcStandardPage: HmrcStandardPage,
+  govukBackLink: GovukBackLink
 )
 
 @(pageTitle: Option[String] = None)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
+
+@content = {
+    @govukBackLink(BackLink.mimicsBrowserBackButtonViaJavaScript)
+    @contentBlock
+}
 
 @hmrcStandardPage(
   HmrcStandardPageParams(
     pageTitle = pageTitle,
     isWelshTranslationAvailable = appConfig.welshLanguageSupportEnabled,
-    backLink = Some(BackLink.mimicsBrowserBackButtonViaJavaScript),
     banners = Banners(
       displayHmrcBanner = true
     ),
@@ -50,7 +55,7 @@
       )
     )
   )
-)(contentBlock)
+)(content)
 
 
 @{

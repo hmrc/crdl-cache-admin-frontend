@@ -60,6 +60,7 @@ customsOffices.viewOffices.table.headings.countryCode = Country Code
 customsOffices.viewOffices.table.headings.domain = Domain
 customsOffices.viewOffices.table.headings.phase = Phase
 customsOffices.viewOffices.table.headings.name = Office Name
+customsOffices.viewOffices.table.headings.actions = Actions
 
 customsOffices.viewOffices.search.heading = Search
 customsOffices.viewOffices.search.referenceNumber = Reference Number

@@ -54,7 +54,8 @@
         name = "countryCode",
         value = countryCode,
         classes = "govuk-input--width-20",
-        label = Label(content = Text(messages("customsOffices.viewOffices.search.countryCode")))
+        label = Label(content = Text(messages("customsOffices.viewOffices.search.countryCode"))),
+        autocomplete = Some("country")
     ))
     @govukInput(Input(
         id = "officeName",
@@ -98,7 +99,7 @@
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.phase"))),
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.domain"))),
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.name"))),
-                HeadCell()
+                HeadCell(content = HtmlContent(s"""<span class="govuk-visually-hidden">${messages("customsOffices.viewOffices.table.headings.actions")}</span>"""))
             )),
             rows = customsOfficesPagedResult.items.map(c => Seq(
                 TableRow(content = Text(c.referenceNumber)),
