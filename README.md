@@ -65,7 +65,7 @@ If not already "logged in" or your session has expired, you will be redirected w
 
 To see value from crdl-cache, use the service Navigation at the top of each page to jump between data types:
 
-![Service navigation at hte tome of writing](.reference-images/Service%20navigation.png)
+![Service navigation at the time of writing](.reference-images/Service%20navigation.png)
 
 #### Available Data
 
