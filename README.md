@@ -69,10 +69,10 @@ To see value from crdl-cache, use the service Navigation at the top of each page
 
 #### Available Data
 
-| List | Info |
-| ---- | ---- |
-| Code Lists | CRDL Cache code lists. Select to see a summary of all available code lists and select Details to see the values of an individual entries and their properties. |
-| Customs Offices | Customs offices lists. Select to see a summary of each office and select Details to see all of the individual fields for that office. |
+| List | Info                                                                                                                                                        |
+| ---- |-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Code Lists | CRDL Cache code lists. Select to see a summary of all available code lists and select Details to see the values of individual entries and their properties. |
+| Customs Offices | Customs offices lists. Select to see a summary of each office and select Details to see all of the individual fields for that office.                       |
 
 ### License
 
