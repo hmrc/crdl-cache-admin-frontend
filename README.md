@@ -12,14 +12,17 @@ This service provides a view into the data held be the [crdl-cache service](http
 sm2 --start CRDL_CACHE_ADMIN
 ```
 
-2. Stop the admin frontend itself from the service manager and it can be run locally:
+2. Stop both the admin frontend and the cache from the service manager so they can be run locally:
 ```shell
 sm2 --stop CRDL_CACHE_ADMIN_FRONTEND
 ```
 ```shell
+sm2 --stop CRDL_CACHE
+```
+```shell
 sbt run -Dapplication.router=testOnlyDoNotUseInAppConf.Routes 
 ```
-\* some test only endpoints are required to mimic endpoints and redirect requests to services that would otherwise be avaialble on cloud environments but are on different hosts when run through service manager, it is recommended to always enable these with running locally
+\* some test only endpoints are required to mimic endpoints and redirect requests to services that would otherwise be available on cloud environments but are on different hosts when run through service manager, it is recommended to always enable these with running locally
 
 The service runs on port 7255 by default
 
@@ -48,13 +51,13 @@ To access the admin frontend, navigate to http://localhost:7255/crdl-cache
 
 If not already "logged in" or your session has expired, you will be redirected with the internal-auth-frontend stub where you can set the necessary grant details.
 
-| Field | Value |
-| ------|-------|
-| Principal | Any value so long as one is provided |
+| Field | Value                                                                      |
+| ------|----------------------------------------------------------------------------|
+| Principal | Any value so long as one is provided (e.g. my-service, or jo.bloggs)                                 |
 | Redirect url | Should be provided by the request itself: http://localhost:7255/crdl-cache |
-| Resource Type | crdl-cache |
-| Resource Locations | * |
-| Action | READ |
+| Resource Type | crdl-cache                                                                 |
+| Resource Locations | *                                                                          |
+| Action | READ                                                                       |
 
 ![Example of filled in internal auth test config](.reference-images/Local%20grants.png)
 
