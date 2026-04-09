@@ -93,13 +93,15 @@
     @pagedResults(
         customsOfficesPagedResult,
         govukTable(Table(
+            caption = Some(messages("customsOffices.viewOffices.table.headings.caption")),
+            captionClasses = "govuk-visually-hidden",
             head = Some(Seq(
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.referenceNumber"))),
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.countryCode"))),
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.phase"))),
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.domain"))),
                 HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.name"))),
-                HeadCell(content = HtmlContent(s"""<span class="govuk-visually-hidden">${messages("customsOffices.viewOffices.table.headings.actions")}</span>"""))
+                HeadCell(content = Text(messages("customsOffices.viewOffices.table.headings.details")))
             )),
             rows = customsOfficesPagedResult.items.map(c => Seq(
                 TableRow(content = Text(c.referenceNumber)),
