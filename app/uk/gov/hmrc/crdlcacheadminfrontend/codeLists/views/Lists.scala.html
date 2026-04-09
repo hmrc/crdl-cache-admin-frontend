@@ -92,13 +92,15 @@
     @pagedResults(
         snapshotsPageResult,
         govukTable(Table(
+          caption = Some(messages("codeLists.viewLists.table.headings.caption")),
+          captionClasses = "govuk-visually-hidden",
             head = Some(Seq(
                 HeadCell(content = Text(messages("codeLists.viewLists.table.headings.code"))),
                 HeadCell(content = Text(messages("codeLists.viewLists.table.headings.snapshot"))),
                 HeadCell(content = Text(messages("codeLists.viewLists.table.headings.updated"))),
                 HeadCell(content = Text(messages("codeLists.viewLists.table.headings.phase"))),
                 HeadCell(content = Text(messages("codeLists.viewLists.table.headings.domain"))),
-                HeadCell()
+                HeadCell(content = Text(messages("codeLists.viewLists.table.headings.details"))),
             )),
             rows = snapshotsPageResult.items.map(s => Seq(
                 TableRow(content = Text(s.codeListCode)),

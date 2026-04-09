@@ -36,10 +36,12 @@ pagedResults.none = No results found
 
 ########## CodeLists
 codeLists.viewLists.pageTitle = Code Lists
+codeLists.viewLists.table.headings.caption = Code List Results
 codeLists.viewLists.table.headings.code = List Code
 codeLists.viewLists.table.headings.snapshot = Version
-codeLists.viewLists.table.headings.domain = Domain
 codeLists.viewLists.table.headings.phase = Phase
+codeLists.viewLists.table.headings.domain = Domain
+codeLists.viewLists.table.headings.details = Details
 codeLists.viewLists.table.headings.updated = Last Updated
 
 codeLists.listDetail.pageTitle = Code List Details: {0}
