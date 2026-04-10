@@ -74,6 +74,38 @@ To see value from crdl-cache, use the service Navigation at the top of each page
 | Code Lists | CRDL Cache code lists. Select to see a summary of all available code lists and select Details to see the values of individual entries and their properties. |
 | Customs Offices | Customs offices lists. Select to see a summary of each office and select Details to see all of the individual fields for that office.                       |
 
+---
+
+### Scalafmt
+
+Check all project files are formatted as expected as follows:
+
+> `sbt scalafmtCheckAll`
+
+Format `*.sbt` and `project/*.scala` files as follows:
+
+> `sbt scalafmtSbt`
+
+Format all project files as follows:
+
+> `sbt scalafmtAll`
+
+### Tests
+
+Run all unit tests with command:
+
+> `sbt test`
+
+Run all integration tests command:
+
+> `sbt it/test`
+
+### All tests and checks
+This is an sbt command alias specific to this project. It will run a scala format
+check, run unit tests, run integration tests and produce a coverage report:
+
+> `sbt runAllChecks`
+
 ### License
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
