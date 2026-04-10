@@ -6,7 +6,9 @@ ThisBuild / scalacOptions += "-Wconf:msg=Flag.*repeatedly:s"
 
 lazy val microservice = Project("crdl-cache-admin-frontend", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
-  .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
+  .disablePlugins(
+    JUnitXmlReportPlugin
+  ) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
     PlayKeys.playDefaultPort := 7255,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
@@ -14,7 +16,7 @@ lazy val microservice = Project("crdl-cache-admin-frontend", file("."))
     // suppress warnings in generated routes files
     scalacOptions += "-Wconf:src=routes/.*:s",
     scalacOptions += "-Wconf:msg=unused import&src=html/.*:s",
-    pipelineStages := Seq(gzip),
+    pipelineStages := Seq(gzip)
   )
   .settings(CodeCoverageSettings.settings: _*)
 
@@ -23,6 +25,5 @@ lazy val it = project
   .dependsOn(microservice % "test->test")
   .settings(DefaultBuildSettings.itSettings())
   .settings(libraryDependencies ++= AppDependencies.it)
-
 
 addCommandAlias("runAllChecks", ";clean;compile;scalafmtAll;coverage;test;it/test;coverageReport")
