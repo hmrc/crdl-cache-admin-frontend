@@ -18,6 +18,6 @@ object CodeCoverageSettings {
     ScoverageKeys.coverageExcludedPackages := excludedPackages.mkString(";"),
     ScoverageKeys.coverageMinimumStmtTotal := 5, // TODO Need a higher level of coversage before we hand this to LS but we want to begin manual test going in QA
     ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true
+    ScoverageKeys.coverageHighlighting  := true
   )
 }

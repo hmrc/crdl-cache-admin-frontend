@@ -12,14 +12,17 @@ This service provides a view into the data held be the [crdl-cache service](http
 sm2 --start CRDL_CACHE_ADMIN
 ```
 
-2. Stop the admin frontend itself from the service manager and it can be run locally:
+2. Stop both the admin frontend and the cache from the service manager so they can be run locally:
 ```shell
 sm2 --stop CRDL_CACHE_ADMIN_FRONTEND
 ```
 ```shell
+sm2 --stop CRDL_CACHE
+```
+```shell
 sbt run -Dapplication.router=testOnlyDoNotUseInAppConf.Routes 
 ```
-\* some test only endpoints are required to mimic endpoints and redirect requests to services that would otherwise be avaialble on cloud environments but are on different hosts when run through service manager, it is recommended to always enable these with running locally
+\* some test only endpoints are required to mimic endpoints and redirect requests to services that would otherwise be available on cloud environments but are on different hosts when run through service manager, it is recommended to always enable these with running locally
 
 The service runs on port 7255 by default
 
@@ -48,13 +51,13 @@ To access the admin frontend, navigate to http://localhost:7255/crdl-cache
 
 If not already "logged in" or your session has expired, you will be redirected with the internal-auth-frontend stub where you can set the necessary grant details.
 
-| Field | Value |
-| ------|-------|
-| Principal | Any value so long as one is provided |
+| Field | Value                                                                      |
+| ------|----------------------------------------------------------------------------|
+| Principal | Any value so long as one is provided (e.g. my-service, or jo.bloggs)                                 |
 | Redirect url | Should be provided by the request itself: http://localhost:7255/crdl-cache |
-| Resource Type | crdl-cache |
-| Resource Locations | * |
-| Action | READ |
+| Resource Type | crdl-cache                                                                 |
+| Resource Locations | *                                                                          |
+| Action | READ                                                                       |
 
 ![Example of filled in internal auth test config](.reference-images/Local%20grants.png)
 
@@ -62,14 +65,46 @@ If not already "logged in" or your session has expired, you will be redirected w
 
 To see value from crdl-cache, use the service Navigation at the top of each page to jump between data types:
 
-![Service navigation at hte tome of writing](.reference-images/Service%20navigation.png)
+![Service navigation at the time of writing](.reference-images/Service%20navigation.png)
 
 #### Available Data
 
-| List | Info |
-| ---- | ---- |
-| Code Lists | CRDL Cache code lists. Select to see a summary of all available code lists and select Details to see the values of an individual entries and their properties. |
-| Customs Offices | Customs offices lists. Select to see a summary of each office and select Details to see all of the individual fields for that office. |
+| List | Info                                                                                                                                                        |
+| ---- |-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Code Lists | CRDL Cache code lists. Select to see a summary of all available code lists and select Details to see the values of individual entries and their properties. |
+| Customs Offices | Customs offices lists. Select to see a summary of each office and select Details to see all of the individual fields for that office.                       |
+
+---
+
+### Scalafmt
+
+Check all project files are formatted as expected as follows:
+
+> `sbt scalafmtCheckAll`
+
+Format `*.sbt` and `project/*.scala` files as follows:
+
+> `sbt scalafmtSbt`
+
+Format all project files as follows:
+
+> `sbt scalafmtAll`
+
+### Tests
+
+Run all unit tests with command:
+
+> `sbt test`
+
+Run all integration tests command:
+
+> `sbt it/test`
+
+### All tests and checks
+This is an sbt command alias specific to this project. It will run a scala format
+check, run unit tests, run integration tests and produce a coverage report:
+
+> `sbt runAllChecks`
 
 ### License
 
