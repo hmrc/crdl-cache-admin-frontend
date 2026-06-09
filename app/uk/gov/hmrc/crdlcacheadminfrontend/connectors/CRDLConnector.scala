@@ -42,7 +42,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
   override protected def configuration: Config = config.config.underlying
 
   private val crdlCacheCodeListsUrl           = s"${config.crdlCacheUrl}/lists"
-  private val crdlCacheCodeListsUrlV2         = s"${config.crdlCacheUrl}/v2/lists"
+  private val crdlCacheCodeListsUrlV2         = s"${config.crdlCacheUrl}/admin/lists"
   private val crdlCacheCodeListsSnapshotUrlV2 = s"${config.crdlCacheUrl}/v2/snapshot"
   private val crdlCacheCustomsOfficesUrlV2    = s"${config.crdlCacheUrl}/v2/offices"
 

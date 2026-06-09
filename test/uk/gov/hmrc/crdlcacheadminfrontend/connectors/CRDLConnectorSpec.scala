@@ -49,7 +49,7 @@ class CRDLConnectorSpec
 
   private val officeSumamriesUrl   = "/crdl-cache/v2/offices/summaries"
   private val officeDetailBaseUrl  = "/crdl-cache/v2/offices"
-  private val codeListSnapShotsUrl = "/crdl-cache/v2/lists"
+  private val codeListSnapShotsUrl = "/crdl-cache/admin/lists"
 
   private val appConfig = new AppConfig(
     Configuration(
