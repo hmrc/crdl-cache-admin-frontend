@@ -56,7 +56,7 @@ class CRDLConnectorSpec
 
   "CRDLConnector.fetchCodeList" should "fetch codelist entries when no filtering parameters are provided" in {
     stubFor(
-      get(urlPathEqualTo("/crdl-cache/lists/BC36"))
+      get(urlPathEqualTo("/lists/BC36"))
         .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
         .willReturn(
           ok()
@@ -111,7 +111,7 @@ class CRDLConnectorSpec
 
   it should "fetch codelist entries when filtering by keys" in {
     stubFor(
-      get(urlPathEqualTo("/crdl-cache/lists/BC36"))
+      get(urlPathEqualTo("/lists/BC36"))
         .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
         .withQueryParam("keys", equalTo("E600,T300"))
         .willReturn(
@@ -160,7 +160,7 @@ class CRDLConnectorSpec
 
   it should "fetch codelist entries when filtering by properties" in {
     stubFor(
-      get(urlPathEqualTo("/crdl-cache/lists/BC36"))
+      get(urlPathEqualTo("/lists/BC36"))
         .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
         .withQueryParam("alcoholicStrengthApplicabilityFlag", equalTo("true"))
         .willReturn(
@@ -197,7 +197,7 @@ class CRDLConnectorSpec
 
   it should "fetch codelist entries when filtering by phase and domain" in {
     stubFor(
-      get(urlPathEqualTo("/crdl-cache/lists/CL017"))
+      get(urlPathEqualTo("/lists/CL017"))
         .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
         .withQueryParam("phase", equalTo("P6"))
         .withQueryParam("domain", equalTo("NCTS"))
@@ -300,7 +300,7 @@ class CRDLConnectorSpec
     val failedState   = "Failed"
 
     stubFor(
-      get(urlPathEqualTo("/crdl-cache/lists/BC36"))
+      get(urlPathEqualTo("/lists/BC36"))
         .inScenario(retryScenario)
         .whenScenarioStateIs(Scenario.STARTED)
         .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
@@ -310,7 +310,7 @@ class CRDLConnectorSpec
 
     // Queue up a success response for the retry
     stubFor(
-      get(urlPathEqualTo("/crdl-cache/lists/BC36"))
+      get(urlPathEqualTo("/lists/BC36"))
         .inScenario(retryScenario)
         .whenScenarioStateIs(failedState)
         .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))

@@ -47,9 +47,9 @@ class CRDLConnectorSpec
   given actorSystem: ActorSystem = ActorSystem("test")
   given HeaderCarrier            = HeaderCarrier()
 
-  private val officeSummariesUrl   = "/crdl-cache/admin/offices/summaries"
-  private val officeDetailBaseUrl  = "/crdl-cache/admin/offices"
-  private val codeListSnapShotsUrl = "/crdl-cache/admin/lists"
+  private val officeSummariesUrl   = "/admin/offices/summaries"
+  private val officeDetailBaseUrl  = "/admin/offices"
+  private val codeListSnapShotsUrl = "/admin/lists"
 
   private val appConfig = new AppConfig(
     Configuration(
