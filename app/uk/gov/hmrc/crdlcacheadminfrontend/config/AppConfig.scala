@@ -25,7 +25,7 @@ class AppConfig @Inject() (val config: Configuration) extends ServicesConfig(con
   lazy val welshLanguageSupportEnabled: Boolean =
     config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
 
-  lazy val crdlCacheUrl: String = s"${baseUrl("crdl-cache")}/crdl-cache"
+  lazy val crdlCacheUrl: String = s"${baseUrl("crdl-cache")}"
 
   lazy val defaultPageSize = config.getOptional[Int]("paging.defaultPageSize").getOrElse(10)
 }
