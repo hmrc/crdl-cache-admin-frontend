@@ -47,9 +47,9 @@ class CRDLConnectorSpec
   given actorSystem: ActorSystem = ActorSystem("test")
   given HeaderCarrier            = HeaderCarrier()
 
-  private val officeSumamriesUrl   = "/crdl-cache/v2/offices/summaries"
-  private val officeDetailBaseUrl  = "/crdl-cache/v2/offices"
-  private val codeListSnapShotsUrl = "/crdl-cache/admin/lists"
+  private val officeSummariesUrl   = "/admin/offices/summaries"
+  private val officeDetailBaseUrl  = "/admin/offices"
+  private val codeListSnapShotsUrl = "/admin/lists"
 
   private val appConfig = new AppConfig(
     Configuration(
@@ -70,7 +70,7 @@ class CRDLConnectorSpec
 
   def customsOfficeSummariesShouldError(errorResponse: () => ResponseDefinitionBuilder) = {
     stubFor(
-      get(urlPathEqualTo(officeSumamriesUrl))
+      get(urlPathEqualTo(officeSummariesUrl))
         .withQueryParam("pageNum", equalTo("1"))
         .withQueryParam("pageSize", equalTo("10"))
         .willReturn(errorResponse())
@@ -99,7 +99,7 @@ class CRDLConnectorSpec
     shouldRetry: Boolean
   ) = {
     stubFor(
-      get(urlEqualTo(s"$officeSumamriesUrl?pageNum=1&pageSize=10"))
+      get(urlEqualTo(s"$officeSummariesUrl?pageNum=1&pageSize=10"))
         .inScenario(retryScenario)
         .whenScenarioStateIs(Scenario.STARTED)
         .willReturn(errorResponse())
@@ -107,7 +107,7 @@ class CRDLConnectorSpec
     )
 
     stubFor(
-      get(urlEqualTo(s"$officeSumamriesUrl?pageNum=1&pageSize=10"))
+      get(urlEqualTo(s"$officeSummariesUrl?pageNum=1&pageSize=10"))
         .inScenario(retryScenario)
         .whenScenarioStateIs(failedState)
         .willReturn(ok().withBody(asJson(pagedCustomsOfficeSummaryResult)))
@@ -160,7 +160,7 @@ class CRDLConnectorSpec
     val pageSize       = pagedCustomsOfficeSummaryResult.items.length
 
     stubFor(
-      get(urlPathEqualTo(officeSumamriesUrl))
+      get(urlPathEqualTo(officeSummariesUrl))
         .withQueryParam("pageNum", equalTo(s"$pageNum"))
         .withQueryParam("pageSize", equalTo(s"$pageSize"))
         .willReturn(
@@ -210,7 +210,7 @@ class CRDLConnectorSpec
 
   it should "include referenceNumber as a query param when provided" in {
     stubFor(
-      get(urlPathEqualTo(officeSumamriesUrl))
+      get(urlPathEqualTo(officeSummariesUrl))
         .withQueryParam("pageNum", equalTo("1"))
         .withQueryParam("pageSize", equalTo("10"))
         .withQueryParam("referenceNumber", equalTo("GB000001"))
@@ -224,7 +224,7 @@ class CRDLConnectorSpec
 
   it should "include countryCode as a query param when provided" in {
     stubFor(
-      get(urlPathEqualTo(officeSumamriesUrl))
+      get(urlPathEqualTo(officeSummariesUrl))
         .withQueryParam("pageNum", equalTo("1"))
         .withQueryParam("pageSize", equalTo("10"))
         .withQueryParam("countryCode", equalTo("GB"))
@@ -238,7 +238,7 @@ class CRDLConnectorSpec
 
   it should "include officeName as a query param when provided" in {
     stubFor(
-      get(urlPathEqualTo(officeSumamriesUrl))
+      get(urlPathEqualTo(officeSummariesUrl))
         .withQueryParam("pageNum", equalTo("1"))
         .withQueryParam("pageSize", equalTo("10"))
         .withQueryParam("officeName", equalTo("London Office"))
@@ -252,7 +252,7 @@ class CRDLConnectorSpec
 
   it should "include all filter params as query params when all are provided" in {
     stubFor(
-      get(urlPathEqualTo(officeSumamriesUrl))
+      get(urlPathEqualTo(officeSummariesUrl))
         .withQueryParam("pageNum", equalTo("1"))
         .withQueryParam("pageSize", equalTo("10"))
         .withQueryParam("referenceNumber", equalTo("GB000001"))

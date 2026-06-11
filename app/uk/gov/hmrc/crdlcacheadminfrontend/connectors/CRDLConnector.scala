@@ -41,10 +41,10 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
 
   override protected def configuration: Config = config.config.underlying
 
-  private val crdlCacheCodeListsUrl           = s"${config.crdlCacheUrl}/lists"
-  private val crdlCacheCodeListsUrlV2         = s"${config.crdlCacheUrl}/admin/lists"
-  private val crdlCacheCodeListsSnapshotUrlV2 = s"${config.crdlCacheUrl}/v2/snapshot"
-  private val crdlCacheCustomsOfficesUrlV2    = s"${config.crdlCacheUrl}/v2/offices"
+  private val crdlCacheCodeListsUrl              = s"${config.crdlCacheUrl}/lists"
+  private val crdlCacheCodeListsUrlAdmin         = s"${config.crdlCacheUrl}/admin/lists"
+  private val crdlCacheCodeListsSnapshotUrlAdmin = s"${config.crdlCacheUrl}/admin/snapshot"
+  private val crdlCacheCustomsOfficesUrlAdmin    = s"${config.crdlCacheUrl}/admin/offices"
 
   private def urlForCodeListSnapshots(
     pageNum: Int,
@@ -59,7 +59,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       domain.map(d => s"domain=$d")
     ).flatten
     val allParams = (Seq(s"pageNum=$pageNum", s"pageSize=$pageSize") ++ filterParams).mkString("&")
-    val urlString = s"$crdlCacheCodeListsUrlV2?$allParams"
+    val urlString = s"$crdlCacheCodeListsUrlAdmin?$allParams"
     url"$urlString"
   }
 
@@ -96,7 +96,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
       case Upstream5xxResponse(_) => true
     } {
       httpClient
-        .get(url"$crdlCacheCodeListsSnapshotUrlV2/$code")
+        .get(url"$crdlCacheCodeListsSnapshotUrlAdmin/$code")
         .execute[Option[CodeListSnapshot]](using
           throwOnFailure(readEitherOf[Option[CodeListSnapshot]])
         )
@@ -162,7 +162,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
     ).flatten
     val allParams =
       (Seq(s"pageNum=$pageNum", s"pageSize=$pageSize") ++ filterParams).mkString("&")
-    val urlString = s"$crdlCacheCustomsOfficesUrlV2/summaries?$allParams"
+    val urlString = s"$crdlCacheCustomsOfficesUrlAdmin/summaries?$allParams"
     url"$urlString"
   }
 
@@ -195,7 +195,7 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
   def fetchCustomsOfficeDetail(
     referenceNumber: String
   )(using hc: HeaderCarrier, ec: ExecutionContext): Future[Option[CustomsOffice]] = {
-    val urlString = s"$crdlCacheCustomsOfficesUrlV2/$referenceNumber"
+    val urlString = s"$crdlCacheCustomsOfficesUrlAdmin/$referenceNumber"
     logger.info(s"Fetching customs office detail for $referenceNumber from crdl-cache")
     val fetchResult = retryFor(s"fetching customs office detail for $referenceNumber") {
       case Upstream4xxResponse(_) => false
