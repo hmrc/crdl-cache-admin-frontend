@@ -41,10 +41,11 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
 
   override protected def configuration: Config = config.config.underlying
 
-  private val crdlCacheCodeListsUrl              = s"${config.crdlCacheUrl}/lists"
-  private val crdlCacheCodeListsUrlAdmin         = s"${config.crdlCacheUrl}/admin/lists"
-  private val crdlCacheCodeListsSnapshotUrlAdmin = s"${config.crdlCacheUrl}/admin/snapshot"
-  private val crdlCacheCustomsOfficesUrlAdmin    = s"${config.crdlCacheUrl}/admin/offices"
+  private val crdlCacheCodeListsUrl      = s"${config.crdlCacheUrl}/crdl-cache/lists"
+  private val crdlCacheCodeListsUrlAdmin = s"${config.crdlCacheUrl}/crdl-cache/admin/lists"
+  private val crdlCacheCodeListsSnapshotUrlAdmin =
+    s"${config.crdlCacheUrl}/crdl-cache/admin/snapshot"
+  private val crdlCacheCustomsOfficesUrlAdmin = s"${config.crdlCacheUrl}/crdl-cache/admin/offices"
 
   private def urlForCodeListSnapshots(
     pageNum: Int,
