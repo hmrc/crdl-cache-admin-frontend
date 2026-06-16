@@ -5,6 +5,8 @@ This service provides a view into the data held be the [crdl-cache service](http
 
 ## Usage
 
+[API Documentation (1.0)](https://redocly.github.io/redoc/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fhmrc%2Fcrdl-cache%2Frefs%2Fheads%2Fmain%2Fpublic%2Fapi%2F1.0%2Fopenapi.yaml)
+
 ### Running the service
 
 1. Make sure you run all the dependant services through the service manager:
@@ -25,6 +27,48 @@ sbt run -Dapplication.router=testOnlyDoNotUseInAppConf.Routes
 \* some test only endpoints are required to mimic endpoints and redirect requests to services that would otherwise be available on cloud environments but are on different hosts when run through service manager, it is recommended to always enable these with running locally
 
 The service runs on port 7255 by default
+
+### Test Only Endpoints
+
+* **Customs office import** can be triggered via curl using the below test-only endpoint:
+    ```shell
+    curl -X POST http://localhost:7252/crdl-cache/test-only/customs-office-lists
+    ```
+
+* Similarly, for **codelists**:
+    ```shell
+    curl -X POST http://localhost:7252/crdl-cache/test-only/codelists
+    ```
+
+* For **correspondence lists**:
+    ```shell
+    curl -X POST http://localhost:7252/crdl-cache/test-only/correspondence-lists
+    ```
+
+* For **Phase & Domain list**:
+    ```shell
+    curl -X POST http://localhost:7252/crdl-cache/test-only/pd-lists
+    ```
+  
+* In cases when you need a fresh import you can use the **DELETE** test-only endpoints to clear the data that has been previously imported. Here are the delete endpoints for customs office, codelists, correspondence lists and last updated respectively.
+
+  Please note that the last updated needs to be deleted along with codelists and correspondence lists. This is because the last updated contains the data when the codelists and correspondence lists were last updated.
+    ```shell
+    curl -X DELETE http://localhost:7252/crdl-cache/test-only/customs-office-lists
+    curl -X DELETE http://localhost:7252/crdl-cache/test-only/codelists
+    curl -X DELETE http://localhost:7252/crdl-cache/test-only/correspondence-lists
+    curl -X DELETE http://localhost:7252/crdl-cache/test-only/last-updated
+    curl -X DELETE http://localhost:7252/crdl-cache/test-only/pd-lists
+    ```
+
+* To check the **status** of an import you can use the following endpoints for customs offices, codelists and correspondence lists respectively.
+    ```shell
+    curl -X GET http://localhost:7252/crdl-cache/test-only/codelists
+    curl -X GET http://localhost:7252/crdl-cache/test-only/customs-office-lists
+    curl -X GET http://localhost:7252/crdl-cache/test-only/correspondence-lists
+    curl -X GET http://localhost:7252/crdl-cache/test-only/pd-lists
+    ```
+  Depending on the job status it would either return IDLE or RUNNING status.
 
 ### Set up local auth
 
