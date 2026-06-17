@@ -91,7 +91,7 @@ Note that this is the same token used by the crdl-cache service so if you have a
 
 To access the admin frontend, navigate to http://localhost:7255/crdl-cache-admin-frontend
 
-> If you are met with a `This page can’t be found` at the url `/internal-auth-frontend/sign-in?continue_url=%2Fcrdl-cache` then it is likely that the required test only endpoints are not enable to handle redirecting this request. Ensure the service is running with test only endpoints enabled.
+> If you are met with a `This page can’t be found` at the url `/internal-auth-frontend/sign-in?continue_url=%2Fcrdl-cache-admin-frontend` then it is likely that the required test only endpoints are not enable to handle redirecting this request. Ensure the service is running with test only endpoints enabled.
 
 If not already "logged in" or your session has expired, you will be redirected with the internal-auth-frontend stub where you can set the necessary grant details.
 
