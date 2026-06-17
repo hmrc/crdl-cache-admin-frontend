@@ -89,27 +89,23 @@ Note that this is the same token used by the crdl-cache service so if you have a
 
 ## Accessing the admin frontend
 
-To access the admin frontend, navigate to http://localhost:7255/crdl-cache
+To access the admin frontend, navigate to http://localhost:7255/crdl-cache-admin-frontend
 
 > If you are met with a `This page can’t be found` at the url `/internal-auth-frontend/sign-in?continue_url=%2Fcrdl-cache` then it is likely that the required test only endpoints are not enable to handle redirecting this request. Ensure the service is running with test only endpoints enabled.
 
 If not already "logged in" or your session has expired, you will be redirected with the internal-auth-frontend stub where you can set the necessary grant details.
 
-| Field | Value                                                                      |
-| ------|----------------------------------------------------------------------------|
-| Principal | Any value so long as one is provided (e.g. my-service, or jo.bloggs)                                 |
-| Redirect url | Should be provided by the request itself: http://localhost:7255/crdl-cache |
-| Resource Type | crdl-cache                                                                 |
-| Resource Locations | *                                                                          |
-| Action | READ                                                                       |
-
-![Example of filled in internal auth test config](.reference-images/Local%20grants.png)
+| Field | Value                                                                                     |
+| ------|-------------------------------------------------------------------------------------------|
+| Principal | Any value so long as one is provided (e.g. my-service, or jo.bloggs)                      |
+| Redirect url | Should be provided by the request itself: http://localhost:7255/crdl-cache-admin-frontend |
+| Resource Type | crdl-cache                                                                                |
+| Resource Locations | *                                                                                         |
+| Action | READ                                                                                      |
 
 ### Viewing values
 
-To see value from crdl-cache, use the service Navigation at the top of each page to jump between data types:
-
-![Service navigation at the time of writing](.reference-images/Service%20navigation.png)
+To see value from crdl-cache, use the service Navigation at the top of each page to jump between data types.
 
 #### Available Data
 
