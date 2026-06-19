@@ -76,7 +76,7 @@ class CodeListsController @Inject (
           }
       }
 
-  def listDetail(code: String): Action[AnyContent] =
+  def listDetail(code: String, phase: Option[String], domain: Option[String]): Action[AnyContent] =
     auth
       .authorizedAction(
         continueUrl = routes.CodeListsController.listDetail(code),
@@ -85,7 +85,7 @@ class CodeListsController @Inject (
       .async { implicit request =>
         val messages = request.messages
         for {
-          snapshots <- crdlConnector.fetchCodeListSnapShot(code)
+          snapshots <- crdlConnector.fetchCodeListSnapShot(code, phase, domain)
           codeLists <- snapshots.fold(Future.successful(List.empty[CodeListEntry]))(s =>
             crdlConnector.fetchCodeList(code, phase = s.phase, domain = s.domain)
           )

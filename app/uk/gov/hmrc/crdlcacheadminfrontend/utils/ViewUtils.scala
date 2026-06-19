@@ -31,8 +31,15 @@ object ViewUtils {
 
   def withBaseUrl(url: String): String = s"/$baseUrl/$url"
 
-  val listsUrl                    = withBaseUrl("lists")
-  def listDetailUrl(code: String) = withBaseUrl(s"lists/$code")
+  val listsUrl = withBaseUrl("lists")
+  def listDetailUrl(code: String, phase: Option[String], domain: Option[String]) = {
+    val baseUrl = withBaseUrl(s"lists/$code")
+    val filterParams = Seq(
+      phase.map(p => s"phase=$p"),
+      domain.map(d => s"domain=$d")
+    ).flatten
+    s"$baseUrl${if (filterParams.nonEmpty) s"?${filterParams.mkString("&")}" else ""}"
+  }
 
   val officesUrl = withBaseUrl("offices")
 
