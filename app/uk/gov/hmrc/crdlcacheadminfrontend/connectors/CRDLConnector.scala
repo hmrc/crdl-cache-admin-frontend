@@ -91,15 +91,23 @@ class CRDLConnector @Inject() (config: AppConfig, httpClient: HttpClientV2)(usin
   }
 
   def fetchCodeListSnapShot(
-    code: String
+    code: String,
+    phase: Option[String] = None,
+    domain: Option[String] = None
   )(using hc: HeaderCarrier, ec: ExecutionContext): Future[Option[CodeListSnapshot]] = {
     logger.info(s"Fetching codelist snapshots from crdl-cache")
     val fetchResult = retryFor(s"fetch of codelist snapshots") {
       case Upstream4xxResponse(_) => false
       case Upstream5xxResponse(_) => true
     } {
+      val baseUrl = s"$crdlCacheCodeListsSnapshotUrlAdmin/$code"
+      val filterParams = Seq(
+        phase.map(p => s"phase=$p"),
+        domain.map(d => s"domain=$d")
+      ).flatten
+      val url = s"$baseUrl${if (filterParams.nonEmpty) s"?${filterParams.mkString("&")}" else ""}"
       httpClient
-        .get(url"$crdlCacheCodeListsSnapshotUrlAdmin/$code")
+        .get(url"$url")
         .execute[Option[CodeListSnapshot]](using
           throwOnFailure(readEitherOf[Option[CodeListSnapshot]])
         )
