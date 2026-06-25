@@ -26,6 +26,8 @@ import play.api.http.{HeaderNames, MimeTypes}
 import play.api.libs.json.Json
 import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.CodeListEntry
 import uk.gov.hmrc.crdlcacheadminfrontend.config.AppConfig
+import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.{CustomsOffice, CustomsOfficeDetail, CustomsOfficeSummary}
+import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
 import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
@@ -364,4 +366,476 @@ class CRDLConnectorSpec
       .fetchCodeList("BC36")
       .map { _ shouldBe expected }
   }
+
+  "CRDLConnector.fetchCustomsOfficeSummaries" should "fetch customs office summaries when no filtering parameters are provided" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/offices/summaries"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("10"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("col/customs-office-summary-response.json")
+        )
+    )
+
+    val expected = PagedResult(
+      items = List(
+        CustomsOfficeSummary(
+          referenceNumber = "GB000060",
+          countryCode = "GB",
+          customsOfficeUsualName = "Dover",
+          phase = Some("P6"),
+          domain = Some("NCTS")
+        )
+      ),
+      pageNum = 1,
+      pageSize = 10,
+      itemsInPage = 1,
+      totalItems = 1,
+      totalPages = 1
+    )
+
+    crdlConnector
+      .fetchCustomsOfficeSummaries(pageNum = 1, pageSize = 10)
+      .map {
+        _ shouldBe expected
+      }
+  }
+
+    it should "fetch entries when reference number is provided" in {
+      stubFor(
+        get(urlPathEqualTo("/crdl-cache/admin/offices/summaries"))
+          .withQueryParam("pageNum", equalTo("1"))
+          .withQueryParam("pageSize", equalTo("10"))
+          .withQueryParam("referenceNumber", equalTo("GB000060"))
+          .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+          .willReturn(
+            ok()
+              .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+              .withBodyFile("col/customs-office-summary-response.json")
+          )
+      )
+
+      val expected = PagedResult(
+        items = List(
+          CustomsOfficeSummary(
+            referenceNumber = "GB000060",
+            countryCode = "GB",
+            customsOfficeUsualName = "Dover",
+            phase = Some("P6"),
+            domain = Some("NCTS")
+          )
+        ),
+        pageNum = 1,
+        pageSize = 10,
+        itemsInPage = 1,
+        totalItems = 1,
+        totalPages = 1
+      )
+
+      crdlConnector
+        .fetchCustomsOfficeSummaries(pageNum = 1, pageSize = 10, referenceNumber = Some("GB000060"))
+        .map {
+          _ shouldBe expected
+        }
+    }
+
+    it should "fetch entries when country code is provided" in {
+      stubFor(
+        get(urlPathEqualTo("/crdl-cache/admin/offices/summaries"))
+          .withQueryParam("pageNum", equalTo("1"))
+          .withQueryParam("pageSize", equalTo("10"))
+          .withQueryParam("countryCode", equalTo("GB"))
+          .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+          .willReturn(
+            ok()
+              .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+              .withBodyFile("col/customs-office-summary-response.json")
+          )
+      )
+
+      val expected = PagedResult(
+        items = List(
+          CustomsOfficeSummary(
+            referenceNumber = "GB000060",
+            countryCode = "GB",
+            customsOfficeUsualName = "Dover",
+            phase = Some("P6"),
+            domain = Some("NCTS")
+          )
+        ),
+        pageNum = 1,
+        pageSize = 10,
+        itemsInPage = 1,
+        totalItems = 1,
+        totalPages = 1
+      )
+
+      crdlConnector
+        .fetchCustomsOfficeSummaries(pageNum = 1, pageSize = 10, countryCode = Some("GB"))
+        .map {
+          _ shouldBe expected
+        }
+    }
+
+    it should "fetch entries when customs office usual name is provided" in {
+      stubFor(
+        get(urlPathEqualTo("/crdl-cache/admin/offices/summaries"))
+          .withQueryParam("pageNum", equalTo("1"))
+          .withQueryParam("pageSize", equalTo("10"))
+          .withQueryParam("officeName", equalTo("Dover"))
+          .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+          .willReturn(
+            ok()
+              .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+              .withBodyFile("col/customs-office-summary-response.json")
+          )
+      )
+
+      val expected = PagedResult(
+        items = List(
+          CustomsOfficeSummary(
+            referenceNumber = "GB000060",
+            countryCode = "GB",
+            customsOfficeUsualName = "Dover",
+            phase = Some("P6"),
+            domain = Some("NCTS")
+          )
+        ),
+        pageNum = 1,
+        pageSize = 10,
+        itemsInPage = 1,
+        totalItems = 1,
+        totalPages = 1
+      )
+
+      crdlConnector
+        .fetchCustomsOfficeSummaries(pageNum = 1, pageSize = 10, officeName = Some("Dover"))
+        .map {
+          _ shouldBe expected
+        }
+    }
+
+    it should "throw UpstreamErrorResponse when crdl-cache returns a client error" in {
+      stubFor(
+        get(urlPathEqualTo("/crdl-cache/admin/office/summaries"))
+          .withQueryParam("pageNum", equalTo("1"))
+          .withQueryParam("pageSize", equalTo("10"))
+          .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+          .willReturn(badRequest())
+      )
+
+      recoverToSucceededIf[UpstreamErrorResponse] {
+        crdlConnector.fetchCustomsOfficeSummaries(pageNum = 1, pageSize = 10)
+      }
+    }
+
+    it should "throw UpstreamErrorResponse when crdl-cache returns a server error consistently" in {
+      stubFor(
+        get(urlPathEqualTo("/crdl-cache/admin/offices/summaries"))
+          .withQueryParam("pageNum", equalTo("1"))
+          .withQueryParam("pageSize", equalTo("10"))
+          .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+          .willReturn(serverError())
+      )
+
+      recoverToSucceededIf[UpstreamErrorResponse] {
+        crdlConnector.fetchCustomsOfficeSummaries(pageNum = 1, pageSize = 10)
+      }
+    }
+
+    it should "not retry when crdl-cache returns a client error" in {
+      val retryScenario = "Retry"
+      val failedState = "Failed"
+
+      stubFor(
+        get(urlPathEqualTo("/crdl-cache/admin/offices/summaries"))
+          .withQueryParam("pageNum", equalTo("1"))
+          .withQueryParam("pageSize", equalTo("10"))
+          .inScenario(retryScenario)
+          .whenScenarioStateIs(Scenario.STARTED)
+          .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+          .willReturn(badRequest())
+          .willSetStateTo(failedState)
+      )
+
+      // Queue up a success response for the second call, which should never happen
+      stubFor(
+        get(urlPathEqualTo("/crdl-cache/admin/offices/summaries"))
+          .withQueryParam("pageNum", equalTo("1"))
+          .withQueryParam("pageSize", equalTo("10"))
+          .inScenario(retryScenario)
+          .whenScenarioStateIs(failedState)
+          .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+          .willReturn(
+            ok()
+              .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+              .withBodyFile("col/customs-office-summary-response.json")
+          )
+      )
+
+      recoverToSucceededIf[UpstreamErrorResponse] {
+        crdlConnector.fetchCustomsOfficeSummaries(pageNum = 1, pageSize = 10)
+      }.map { assertion =>
+        verify(1, getRequestedFor(urlPathEqualTo("/crdl-cache/admin/offices/summaries"))
+          .withQueryParam("pageNum", equalTo("1"))
+          .withQueryParam("pageSize", equalTo("10")))
+        assertion
+      }
+
+    }
+
+    it should "retry when crdl-cache returns a server error" in {
+    val retryScenario = "Retry"
+    val failedState = "Failed"
+
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/offices/summaries"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("10"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(Scenario.STARTED)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(serverError())
+        .willSetStateTo(failedState)
+    )
+
+    // Queue up a success response for the retry
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/offices/summaries"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("10"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(failedState)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("col/customs-office-summary-response.json")
+        )
+    )
+
+    val expected = PagedResult(
+      items = List(
+        CustomsOfficeSummary(
+          referenceNumber = "GB000060",
+          countryCode = "GB",
+          customsOfficeUsualName = "Dover",
+          phase = Some("P6"),
+          domain = Some("NCTS")
+        )
+      ),
+      pageNum = 1,
+      pageSize = 10,
+      itemsInPage = 1,
+      totalItems = 1,
+      totalPages = 1
+    )
+
+    crdlConnector
+      .fetchCustomsOfficeSummaries(pageNum = 1, pageSize = 10)
+      .map { result =>
+        verify(2, getRequestedFor(urlPathEqualTo("/crdl-cache/admin/offices/summaries"))
+          .withQueryParam("pageNum", equalTo("1"))
+          .withQueryParam("pageSize", equalTo("10")))
+        result shouldBe expected
+      }
+  }
+
+  "CRDLConnector.fetchCustomsOfficeDetail" should "fetch customs office details" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/offices/GB000001"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("col/customs-office-detail-response.json")
+        )
+    )
+
+    val expected = Some(
+      CustomsOffice(
+        referenceNumber = "GB000001",
+        phase = Some("P6"),
+        domain = Some("NCTS"),
+        activeFrom = None,
+        activeTo = None,
+        referenceNumberMainOffice = None,
+        referenceNumberHigherAuthority = None,
+        referenceNumberCompetentAuthorityOfEnquiry = None,
+        referenceNumberCompetentAuthorityOfRecovery = None,
+        referenceNumberTakeover = None,
+        countryCode = "GB",
+        emailAddress = None,
+        unLocodeId = None,
+        nctsEntryDate = None,
+        nearestOffice = None,
+        postalCode = "SW1A 1AA",
+        phoneNumber = None,
+        faxNumber = None,
+        telexNumber = None,
+        geoInfoCode = None,
+        regionCode = None,
+        traderDedicated = false,
+        dedicatedTraderLanguageCode = None,
+        dedicatedTraderName = None,
+        customsOfficeSpecificNotesCodes = List(),
+        customsOfficeLsd = CustomsOfficeDetail(
+          customsOfficeUsualName = "London Office",
+          languageCode = "EN",
+          city = "London",
+          prefixSuffixFlag = false,
+          prefixSuffixLevel = None,
+          prefixSuffixName = None,
+          spaceToAdd = false,
+          streetAndNumber = "1 Test Street"
+        ),
+        customsOfficeTimetable = List()
+      )
+    )
+
+    crdlConnector
+      .fetchCustomsOfficeDetail(referenceNumber = "GB000001")
+      .map {
+        _ shouldBe expected
+      }
+  }
+
+  it should "throw UpstreamErrorResponse when crdl-cache returns a client error" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/offices/GB000001"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(badRequest())
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      crdlConnector.fetchCustomsOfficeDetail(referenceNumber = "GB000001")
+    }
+  }
+
+  it should "throw UpstreamErrorResponse when crdl-cache returns a server error consistently" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/offices/GB000001"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(serverError())
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      crdlConnector.fetchCustomsOfficeDetail(referenceNumber = "GB000001")
+    }
+  }
+
+  it should "not retry when crdl-cache returns a client error" in {
+    val retryScenario = "Retry"
+    val failedState = "Failed"
+
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/offices/GB000001"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(Scenario.STARTED)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(badRequest())
+        .willSetStateTo(failedState)
+    )
+
+    // Queue up a success response for the second call, which should never happen
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/offices/GB000001"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(failedState)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("col/customs-office-detail-response.json")
+        )
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      crdlConnector.fetchCustomsOfficeDetail(referenceNumber = "GB000001")
+    }.map { assertion =>
+      verify(1, getRequestedFor(urlPathEqualTo("/crdl-cache/admin/offices/GB000001")))
+      assertion
+    }
+
+  }
+
+  it should "retry when crdl-cache returns a server error" in {
+    val retryScenario = "Retry"
+    val failedState = "Failed"
+
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/offices/GB000001"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(Scenario.STARTED)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(serverError())
+        .willSetStateTo(failedState)
+    )
+
+    // Queue up a success response for the retry
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/offices/GB000001"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(failedState)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("col/customs-office-detail-response.json")
+        )
+    )
+
+
+    val expected = Some(
+      CustomsOffice(
+        referenceNumber = "GB000001",
+        phase = Some("P6"),
+        domain = Some("NCTS"),
+        activeFrom = None,
+        activeTo = None,
+        referenceNumberMainOffice = None,
+        referenceNumberHigherAuthority = None,
+        referenceNumberCompetentAuthorityOfEnquiry = None,
+        referenceNumberCompetentAuthorityOfRecovery = None,
+        referenceNumberTakeover = None,
+        countryCode = "GB",
+        emailAddress = None,
+        unLocodeId = None,
+        nctsEntryDate = None,
+        nearestOffice = None,
+        postalCode = "SW1A 1AA",
+        phoneNumber = None,
+        faxNumber = None,
+        telexNumber = None,
+        geoInfoCode = None,
+        regionCode = None,
+        traderDedicated = false,
+        dedicatedTraderLanguageCode = None,
+        dedicatedTraderName = None,
+        customsOfficeSpecificNotesCodes = List(),
+        customsOfficeLsd = CustomsOfficeDetail(
+          customsOfficeUsualName = "London Office",
+          languageCode = "EN",
+          city = "London",
+          prefixSuffixFlag = false,
+          prefixSuffixLevel = None,
+          prefixSuffixName = None,
+          spaceToAdd = false,
+          streetAndNumber = "1 Test Street"
+        ),
+        customsOfficeTimetable = List()
+      )
+    )
+
+    crdlConnector
+      .fetchCustomsOfficeDetail(referenceNumber = "GB000001")
+      .map { result =>
+        verify(2, getRequestedFor(urlPathEqualTo("/crdl-cache/admin/offices/GB000001")))
+        result shouldBe expected
+      }
+  }
+
 }
