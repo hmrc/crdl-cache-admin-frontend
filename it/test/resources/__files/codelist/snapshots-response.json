@@ -1,0 +1,13 @@
+{
+  "items": [
+    { "codeListCode":  "BC46", "snapshotVersion":  1, "lastUpdated": "2026-06-18T10:00:00Z" },
+    { "codeListCode":  "BC57", "snapshotVersion":  1, "lastUpdated": "2026-06-18T10:00:00Z" },
+    { "codeListCode":  "CL008", "snapshotVersion":  1, "phase":  "P6", "domain": "NCTS", "lastUpdated": "2026-06-18T10:00:00Z" },
+    { "codeListCode":  "CL042", "snapshotVersion":  1, "phase":  "P6", "domain": "NCTS", "lastUpdated": "2026-06-18T10:00:00Z" }
+  ],
+  "pageNum": 1,
+  "pageSize": 4,
+  "itemsInPage": 4,
+  "totalItems": 4,
+  "totalPages": 1
+}

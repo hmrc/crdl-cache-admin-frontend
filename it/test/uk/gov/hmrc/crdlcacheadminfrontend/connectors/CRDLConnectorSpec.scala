@@ -24,7 +24,7 @@ import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import play.api.http.{HeaderNames, MimeTypes}
 import play.api.libs.json.Json
-import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.CodeListEntry
+import uk.gov.hmrc.crdlcacheadminfrontend.codeLists.models.{CodeListEntry, CodeListSnapshot}
 import uk.gov.hmrc.crdlcacheadminfrontend.config.AppConfig
 import uk.gov.hmrc.crdlcacheadminfrontend.customsOffices.models.{CustomsOffice, CustomsOfficeDetail, CustomsOfficeSummary}
 import uk.gov.hmrc.crdlcacheadminfrontend.models.paging.PagedResult
@@ -33,6 +33,8 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import java.util.UUID
 import uk.gov.hmrc.http.Authorization
+
+import java.time.Instant
 
 class CRDLConnectorSpec
   extends AsyncFlatSpec
@@ -294,6 +296,9 @@ class CRDLConnectorSpec
 
     recoverToSucceededIf[UpstreamErrorResponse] {
       crdlConnector.fetchCodeList("BC999")
+    }. map { assertion =>
+      verify(1, getRequestedFor(urlPathEqualTo("/crdl-cache/lists/BC999")))
+      assertion
     }
   }
 
@@ -364,7 +369,573 @@ class CRDLConnectorSpec
 
     crdlConnector
       .fetchCodeList("BC36")
-      .map { _ shouldBe expected }
+      .map { result =>
+        verify(2, getRequestedFor(urlPathEqualTo("/crdl-cache/lists/BC36")))
+        result shouldBe expected
+      }
+  }
+
+  "CRDLConnector.fetchCodeListSnapShots" should "fetch codelist snapshots when no filtering parameters are provided" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/lists"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("4"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("codelist/snapshots-response.json")
+        )
+    )
+
+    val expected = PagedResult(
+      items = List(
+        CodeListSnapshot(
+          codeListCode = "BC46",
+          snapshotVersion = 1,
+          phase = None,
+          domain = None,
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "BC57",
+          snapshotVersion = 1,
+          phase = None,
+          domain = None,
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "CL008",
+          snapshotVersion = 1,
+          phase = Some("P6"),
+          domain = Some("NCTS"),
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "CL042",
+          snapshotVersion = 1,
+          phase = Some("P6"),
+          domain = Some("NCTS"),
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        )
+      ),
+      pageNum = 1,
+      pageSize = 4,
+      itemsInPage = 4,
+      totalItems = 4,
+      totalPages = 1
+    )
+
+    crdlConnector
+      .fetchCodeListSnapShots(pageNum = 1, pageSize = 4)
+      .map {
+        _ shouldBe expected
+      }
+  }
+
+  it should "fetch entries when phase and domain are both provided" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/lists"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("4"))
+        .withQueryParam("phase", equalTo("P6"))
+        .withQueryParam("domain", equalTo("NCTS"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("codelist/snapshots-response.json")
+        )
+    )
+
+    val expected = PagedResult(
+      items = List(
+        CodeListSnapshot(
+          codeListCode = "BC46",
+          snapshotVersion = 1,
+          phase = None,
+          domain = None,
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "BC57",
+          snapshotVersion = 1,
+          phase = None,
+          domain = None,
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "CL008",
+          snapshotVersion = 1,
+          phase = Some("P6"),
+          domain = Some("NCTS"),
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "CL042",
+          snapshotVersion = 1,
+          phase = Some("P6"),
+          domain = Some("NCTS"),
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        )
+      ),
+      pageNum = 1,
+      pageSize = 4,
+      itemsInPage = 4,
+      totalItems = 4,
+      totalPages = 1
+    )
+
+    crdlConnector
+      .fetchCodeListSnapShots(pageNum = 1, pageSize = 4, phase = Some("P6"), domain = Some("NCTS"))
+      .map {
+        _ shouldBe expected
+      }
+  }
+
+  it should "fetch entries when codeListCode is provided" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/lists"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("4"))
+        .withQueryParam("codeListCode", equalTo("BC46"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("codelist/snapshots-response.json")
+        )
+    )
+
+    val expected = PagedResult(
+      items = List(
+        CodeListSnapshot(
+          codeListCode = "BC46",
+          snapshotVersion = 1,
+          phase = None,
+          domain = None,
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "BC57",
+          snapshotVersion = 1,
+          phase = None,
+          domain = None,
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "CL008",
+          snapshotVersion = 1,
+          phase = Some("P6"),
+          domain = Some("NCTS"),
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "CL042",
+          snapshotVersion = 1,
+          phase = Some("P6"),
+          domain = Some("NCTS"),
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        )
+      ),
+      pageNum = 1,
+      pageSize = 4,
+      itemsInPage = 4,
+      totalItems = 4,
+      totalPages = 1
+    )
+
+    crdlConnector
+      .fetchCodeListSnapShots(pageNum = 1, pageSize = 4, codeListCode = Some("BC46"))
+      .map {
+        _ shouldBe expected
+      }
+  }
+
+  it should "fetch entries when all parameters are provided" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/lists"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("4"))
+        .withQueryParam("codeListCode", equalTo("CL042"))
+        .withQueryParam("phase", equalTo("P6"))
+        .withQueryParam("domain", equalTo("NCTS"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("codelist/snapshots-response.json")
+        )
+    )
+
+    val expected = PagedResult(
+      items = List(
+        CodeListSnapshot(
+          codeListCode = "BC46",
+          snapshotVersion = 1,
+          phase = None,
+          domain = None,
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "BC57",
+          snapshotVersion = 1,
+          phase = None,
+          domain = None,
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "CL008",
+          snapshotVersion = 1,
+          phase = Some("P6"),
+          domain = Some("NCTS"),
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "CL042",
+          snapshotVersion = 1,
+          phase = Some("P6"),
+          domain = Some("NCTS"),
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        )
+      ),
+      pageNum = 1,
+      pageSize = 4,
+      itemsInPage = 4,
+      totalItems = 4,
+      totalPages = 1
+    )
+
+    crdlConnector
+      .fetchCodeListSnapShots(
+        pageNum = 1,
+        pageSize = 4,
+        codeListCode = Some("CL042"),
+        phase = Some("P6"),
+        domain = Some("NCTS")
+      )
+      .map {
+        _ shouldBe expected
+      }
+  }
+
+  it should "throw UpstreamErrorResponse when crdl-cache returns a client error" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/lists"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("4"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(badRequest())
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      crdlConnector.fetchCodeListSnapShots(pageNum = 1, pageSize = 4)
+    }
+  }
+
+  it should "throw UpstreamErrorResponse when crdl-cache returns a server error consistently" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/lists"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("4"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(serverError())
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      crdlConnector.fetchCodeListSnapShots(pageNum = 1, pageSize = 4)
+    }
+  }
+
+  it should "not retry when crdl-cache returns a client error" in {
+    val retryScenario = "Retry"
+    val failedState   = "Failed"
+
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/lists"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("4"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(Scenario.STARTED)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(badRequest())
+        .willSetStateTo(failedState)
+    )
+
+    // Queue up a success response for the second call, which should never happen
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/lists/"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("4"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(failedState)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("codelist/snapshots-response.json")
+        )
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      crdlConnector.fetchCodeListSnapShots(pageNum = 1, pageSize = 4)
+    }.map { assertion =>
+      verify(1, getRequestedFor(urlPathEqualTo("/crdl-cache/admin/lists"))
+      .withQueryParam("pageNum", equalTo("1"))
+      .withQueryParam("pageSize", equalTo("4")))
+      assertion
+    }
+  }
+
+  it should "retry when crdl-cache returns a server error" in {
+    val retryScenario = "Retry"
+    val failedState   = "Failed"
+
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/lists"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("4"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(Scenario.STARTED)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(serverError())
+        .willSetStateTo(failedState)
+    )
+
+    // Queue up a success response for the retry
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/lists"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("4"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(failedState)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("codelist/snapshots-response.json")
+        )
+    )
+
+    val expected = PagedResult(
+      items = List(
+        CodeListSnapshot(
+          codeListCode = "BC46",
+          snapshotVersion = 1,
+          phase = None,
+          domain = None,
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "BC57",
+          snapshotVersion = 1,
+          phase = None,
+          domain = None,
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "CL008",
+          snapshotVersion = 1,
+          phase = Some("P6"),
+          domain = Some("NCTS"),
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        ),
+        CodeListSnapshot(
+          codeListCode = "CL042",
+          snapshotVersion = 1,
+          phase = Some("P6"),
+          domain = Some("NCTS"),
+          lastUpdated = Some(Instant.parse("2026-06-18T10:00:00Z"))
+        )
+      ),
+      pageNum = 1,
+      pageSize = 4,
+      itemsInPage = 4,
+      totalItems = 4,
+      totalPages = 1
+    )
+
+    crdlConnector
+      .fetchCodeListSnapShots(pageNum = 1, pageSize = 4)
+      .map { result =>
+        verify(2, getRequestedFor(urlPathEqualTo("/crdl-cache/admin/lists"))
+        .withQueryParam("pageNum", equalTo("1"))
+        .withQueryParam("pageSize", equalTo("4")))
+        result shouldBe expected
+      }
+  }
+
+  "CRDLConnector.fetchCodeListSnapShot" should "fetch codelist snapshot when phase and domain are not present" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/snapshot/BC109"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("codelist/snapshot-BC109.json")
+        )
+    )
+
+    val expected = Some(
+      CodeListSnapshot(
+        codeListCode = "BC109",
+        snapshotVersion = 2,
+        phase = None,
+        domain = None,
+        lastUpdated = Some(Instant.parse("2025-11-19T11:00:28.295Z"))
+      )
+    )
+
+    crdlConnector
+      .fetchCodeListSnapShot("BC109")
+      .map {
+        _ shouldBe expected
+      }
+  }
+
+  it should "fetch codelist snapshot when phase and domain are present" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/snapshot/CL219"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("codelist/snapshot-CL219.json")
+        )
+    )
+
+    val expected = Some(
+      CodeListSnapshot(
+        codeListCode = "CL219",
+        snapshotVersion = 16,
+        phase = Some("P6"),
+        domain = Some("NCTS"),
+        lastUpdated = Some(Instant.parse("2026-06-19T02:30:31.885Z"))
+      )
+    )
+
+    crdlConnector
+      .fetchCodeListSnapShot("CL219")
+      .map {
+        _ shouldBe expected
+      }
+  }
+
+  it should "throw UpstreamErrorResponse when crdl-cache returns a client error" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/snapshot/CL219"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(badRequest())
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      crdlConnector.fetchCodeListSnapShot("CL219")
+    }
+  }
+
+  it should "throw UpstreamErrorResponse when crdl-cache returns a server error consistently" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/lists"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(serverError())
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      crdlConnector.fetchCodeListSnapShot("CL219")
+    }
+  }
+
+  it should "not retry when crdl-cache returns a client error" in {
+    val retryScenario = "Retry"
+    val failedState = "Failed"
+
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/snapshot/CL219"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(Scenario.STARTED)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(badRequest())
+        .willSetStateTo(failedState)
+    )
+
+    // Queue up a success response for the second call, which should never happen
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/snapshot/CL219"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(failedState)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("codelist/snapshot-CL219.json")
+        )
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      crdlConnector.fetchCodeListSnapShot("CL219")
+    }.map { assertion =>
+      verify(1, getRequestedFor(urlPathEqualTo("/crdl-cache/admin/snapshot/CL219")))
+      assertion
+    }
+  }
+
+  it should "retry when crdl-cache returns a server error" in {
+    val retryScenario = "Retry"
+    val failedState = "Failed"
+
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/snapshot/CL219"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(Scenario.STARTED)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(serverError())
+        .willSetStateTo(failedState)
+    )
+
+    // Queue up a success response for the retry
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/snapshot/CL219"))
+        .inScenario(retryScenario)
+        .whenScenarioStateIs(failedState)
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+
+        .willReturn(
+          ok()
+            .withHeader(HeaderNames.CONTENT_TYPE, MimeTypes.JSON)
+            .withBodyFile("codelist/snapshot-CL219.json")
+        )
+    )
+
+    val expected = Some(
+      CodeListSnapshot(
+        codeListCode = "CL219",
+        snapshotVersion = 16,
+        phase = Some("P6"),
+        domain = Some("NCTS"),
+        lastUpdated = Some(Instant.parse("2026-06-19T02:30:31.885Z"))
+      )
+    )
+
+    crdlConnector
+      .fetchCodeListSnapShot("CL219")
+      .map { result =>
+        verify(2, getRequestedFor(urlPathEqualTo("/crdl-cache/admin/snapshot/CL219")))
+        result shouldBe expected
+      }
+
+  }
+
+  it should "return None when the code list snapshot is not found" in {
+    stubFor(
+      get(urlPathEqualTo("/crdl-cache/admin/snapshot/UNKNOWN"))
+        .withHeader(HeaderNames.AUTHORIZATION, equalTo(authToken))
+        .willReturn(notFound())
+    )
+
+    recoverToSucceededIf[UpstreamErrorResponse] {
+      crdlConnector
+        .fetchCodeListSnapShot("UNKNOWN")
+    }
   }
 
   "CRDLConnector.fetchCustomsOfficeSummaries" should "fetch customs office summaries when no filtering parameters are provided" in {
