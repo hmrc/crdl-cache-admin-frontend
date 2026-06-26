@@ -1,3 +1,5 @@
+digital-service: Central Reference Data Library Cache
+description: This service provides views to observe the current data held by Central Reference Data Library Cache (crdl-cache)
 repoVisibility: public_0C3F0CE3E6E6448FAD341E7BFA50FCD333E06A20CFF05FCACE61154DDBBADF71
 type: service
 service-type: frontend
