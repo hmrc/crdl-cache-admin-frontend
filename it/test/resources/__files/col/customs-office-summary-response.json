@@ -1,0 +1,15 @@
+{
+  "items": [
+    { "referenceNumber" : "GB000060",
+      "countryCode" : "GB",
+      "customsOfficeUsualName" : "Dover",
+      "phase" : "P6",
+      "domain" : "NCTS"
+    }
+  ],
+  "pageNum": 1,
+  "pageSize": 10,
+  "itemsInPage": 1,
+  "totalItems": 1,
+  "totalPages": 1
+}
